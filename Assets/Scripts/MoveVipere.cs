@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Movepoule : MonoBehaviour
+public class MoveVipere : MonoBehaviour
 {
-    public float speed = 3.0f;
     private UnityEngine.AI.NavMeshAgent agent;
     private Transform prey;
     private Transform predator;
-    private Vector3 direction ;
 
+    public Vector3 point;
+    private Vector3 direction;
+    private Vector3 distance ;
+    private bool prisEnChasse = false;
+
+    private float sightRange = 20.0f;
+    private float sightAngle = 180.0f;
 
     private GameObject[] renardList ;
     private GameObject[] pouleList ;
@@ -23,12 +28,14 @@ public class Movepoule : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         renardList = GameObject.FindGameObjectsWithTag("Renard1");
-        renard1 = GameObject.FindWithTag("Renard1");
+        renard1 = renardList[0];
+        Vector3 point = renard1.transform.position;
         prey = renard1.transform;
 
         pouleList = GameObject.FindGameObjectsWithTag("poule1");
-        poule1 = GameObject.FindWithTag("poule1");
+        poule1 = pouleList[0];
         predator = poule1.transform;
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         randomPoint = transform.position + Random.insideUnitSphere * range;
@@ -56,10 +63,17 @@ public class Movepoule : MonoBehaviour
           return false;
       }
 
-      bool AwayPoint(Vector3 predator, float range, out Vector3 result)
+      void RunAway(Vector3 point)
+      {
+          if (AwayPoint(point, range, out Vector3 goal))
+          {
+              Debug.DrawRay(agent.transform.position + goal, Vector3.up, Color.red, 1.0f);
+              agent.SetDestination(agent.transform.position + goal); //le vecteur goal est appliqué depuis la position de l'agent
+          }
+      }
+
+  bool AwayPoint(Vector3 predator, float range, out Vector3 result)
     {
-        for (int i = 0; i < 30; i++)
-        {
           // Gets a vector that points from the player's position to the target's.
            distance = predator - transform.position;
            direction = distance.normalized;
@@ -70,7 +84,7 @@ public class Movepoule : MonoBehaviour
                 result = hit.position;
                 return true;
             }
-        }
+
         result = Vector3.zero;
         return false;
     }
@@ -115,18 +129,17 @@ public class Movepoule : MonoBehaviour
     {
         renardList = GameObject.FindGameObjectsWithTag("Renard1");
 
-        float step = speed * Time.deltaTime ; // calculate distance to move
         // on initialise la référence distance
-        var ecartChik = transform.position - renardList[0].transform.position;
-        var distanceChik = ecartChik.magnitude;
+        var ecartRenard = transform.position - renardList[0].transform.position;
+        var distanceRenard = ecartRenard.magnitude;
         // suivre la proie
         // on vérifie chaque poule pour savoir laquelle est la plus proche
         foreach (GameObject renard in renardList)
         {
-          if (Vector3.Distance(transform.position, renard.transform.position) < distanceChik)
+          if (Vector3.Distance(transform.position, renard.transform.position) < distanceRenard)
           {
-            ecartChik = transform.position - renard.transform.position ;
-            distanceChik = ecartChik.magnitude ; // on donne la nouvelle valeur à comparer
+            ecartRenard = transform.position - renard.transform.position ;
+            distanceRenard = ecartRenard.magnitude ; // on donne la nouvelle valeur à comparer
             prey=renard.transform ; // on définie la proie la plus proche
           }
         }
