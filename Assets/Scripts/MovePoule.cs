@@ -183,16 +183,16 @@ public class MoveRenard : MonoBehaviour
     {
       renardList = GameObject.FindGameObjectsWithTag("Renard1");
       vipereList = GameObject.FindGameObjectsWithTag("Vipere1");
-
-// mode chasse
-
-    if( CibleEnVue(out Vector3 prey) && prisPourCible(out Vector3 predator) ) {
+      enChasse = CibleEnVue(out Vector3 prey);
+      prisEnChasse = prisPourCible(out Vector3 predator);
+      
+      if( enChasse && prisEnChasse ) {
         if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
-             {  RunAfter(Vector3 prey) ; }
-        else {  RunAway(Vector3 predator) ; } }
-    else if (CibleEnVue(out Vector3 prey) == false && prisPourCible(out Vector3 predator) == false) {    FreeWalk() ; } // mode balade
-    else if (CibleEnVue(out Vector3 prey) == true && prisPourCible(out Vector3 predator) == false) {   RunAfter(Vector3 prey) ; } // mode chasse
-    else if (CibleEnVue(out Vector3 prey) == false && prisPourCible(out Vector3 predator) == true) {   RunAway(Vector3 predator) ; } // mode fuite
+             {  RunAfter(prey) ; }
+        else {  RunAway( predator) ; } }
+    else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
+    else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
+    else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
 
 
     }
