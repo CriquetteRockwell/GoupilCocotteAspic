@@ -9,6 +9,9 @@ public class MovePoule : MonoBehaviour
     public float range = 10.0f;
     public float sightRange = 20.0f;
     public float sightAngle = 180.0f;
+    public float pondAppetit = 0.5f ;
+    public float pondPeur = 0.5f;
+
     //public Vector3 point;
     private Vector3 direction;
     private Vector3 distance ;
@@ -182,23 +185,15 @@ public class MovePoule : MonoBehaviour
       vipereList = GameObject.FindGameObjectsWithTag("Vipere1");
       pouleList = GameObject.FindGameObjectsWithTag("Poule1");
 
-// mode chasse
-      if(CibleEnVue(out Vector3 prey))
-        {
-          RunAfter(prey);
-        }
-      else
-        {
-        //  Vector3 point = vipere.transform.position;
-    // mode fuite ou free roam
-          if(prisPourCible(out Vector3 predator))
-          {
-            RunAway(predator);
-          }
-          else
-          {
-            FreeWalk() ;
-          }
-        }
-  }
+
+      if( CibleEnVue(out Vector3 prey) && prisPourCible(out Vector3 predator) ) {
+          if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
+               {  RunAfter(Vector3 prey) ; }
+          else {  RunAway(Vector3 predator) ; } }
+      else if (CibleEnVue(out Vector3 prey) == false && prisPourCible(out Vector3 predator) == false) {    FreeWalk() ; } // mode balade
+      else if (CibleEnVue(out Vector3 prey) == true && prisPourCible(out Vector3 predator) == false) {   RunAfter(Vector3 prey) ; } // mode chasse
+      else if (CibleEnVue(out Vector3 prey) == false && prisPourCible(out Vector3 predator) == true) {   RunAway(Vector3 predator) ; } // mode fuite
+
+
+    }
 }
