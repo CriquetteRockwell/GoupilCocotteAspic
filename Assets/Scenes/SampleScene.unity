@@ -231,17 +231,17 @@ PrefabInstance:
     - target: {fileID: 1198259838880063688, guid: 4ce8d9af7aeb3ff46a4dc6b2d4b33755,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 6.7649975
+      value: -4.1
       objectReference: {fileID: 0}
     - target: {fileID: 1198259838880063688, guid: 4ce8d9af7aeb3ff46a4dc6b2d4b33755,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.52239305
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1198259838880063688, guid: 4ce8d9af7aeb3ff46a4dc6b2d4b33755,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.543146
+      value: -17.4
       objectReference: {fileID: 0}
     - target: {fileID: 1198259838880063688, guid: 4ce8d9af7aeb3ff46a4dc6b2d4b33755,
         type: 3}
@@ -286,7 +286,7 @@ PrefabInstance:
     - target: {fileID: 1198259838880063689, guid: 4ce8d9af7aeb3ff46a4dc6b2d4b33755,
         type: 3}
       propertyPath: pondAppetit
-      value: 30
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4ce8d9af7aeb3ff46a4dc6b2d4b33755, type: 3}
