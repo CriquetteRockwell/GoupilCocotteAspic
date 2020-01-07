@@ -174,7 +174,8 @@ public class MoveRenard : MonoBehaviour
         {
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
-          collision.gameObject.transform.position = homeVipere ;
+          //collision.gameObject.transform.position = homeVipere ;
+          print("just teleported");
         }
     }
 
@@ -185,7 +186,7 @@ public class MoveRenard : MonoBehaviour
       vipereList = GameObject.FindGameObjectsWithTag("Vipere1");
       enChasse = CibleEnVue(out Vector3 prey);
       prisEnChasse = prisPourCible(out Vector3 predator);
-      
+
       if( enChasse && prisEnChasse ) {
         if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
              {  RunAfter(prey) ; }

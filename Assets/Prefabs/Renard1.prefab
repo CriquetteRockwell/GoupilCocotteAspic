@@ -219,8 +219,8 @@ MonoBehaviour:
   range: 10
   sightRange: 20
   sightAngle: 180
-  pondAppetit: 5
-  pondPeur: 0.1
+  pondAppetit: 0.5
+  pondPeur: 0.5
 --- !u!195 &4504397579359569202
 NavMeshAgent:
   m_ObjectHideFlags: 0

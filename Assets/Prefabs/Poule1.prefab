@@ -110,8 +110,8 @@ MonoBehaviour:
   range: 10
   sightRange: 30
   sightAngle: 360
-  pondAppetit: 5
-  pondPeur: 0.1
+  pondAppetit: 0.5
+  pondPeur: 0.5
 --- !u!54 &1636395277755467052
 Rigidbody:
   m_ObjectHideFlags: 0

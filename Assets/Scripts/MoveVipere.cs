@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class MoveVipere : MonoBehaviour
 {
+    //string leftvalue = "peur";
+  //  string rightvalue = "affamé";
+  //  public static float Slider(float value, string leftValue, string rightValue);
     private UnityEngine.AI.NavMeshAgent agent;
     private Transform prey;
     private Transform predator;
@@ -34,7 +37,7 @@ public class MoveVipere : MonoBehaviour
         Vector3 point = renard1.transform.position;
         prey = renard1.transform;
 
-        pouleList = GameObject.FindGameObjectsWithTag("poule1");
+        pouleList = GameObject.FindGameObjectsWithTag("Poule1");
         poule1 = pouleList[0];
         predator = poule1.transform;
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
