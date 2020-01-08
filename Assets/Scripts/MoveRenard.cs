@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovePoule : MonoBehaviour
+public class MoveRenard : MonoBehaviour
 {
     private UnityEngine.AI.NavMeshAgent agent;
     private UnityEngine.AI.NavMeshHit hit;
@@ -186,14 +186,15 @@ public class MovePoule : MonoBehaviour
       pouleList = GameObject.FindGameObjectsWithTag("Poule1");
       enChasse = CibleEnVue(out Vector3 prey);
       prisEnChasse = prisPourCible(out Vector3 predator);
-      
+
       if( enChasse && prisEnChasse ) {
           if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
-               {  RunAfter(prey) ; }
-          else {  RunAway(predator) ; } }
-      else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
-      else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
-      else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
+             {  RunAfter(prey) ; }
+         else {  RunAway(predator) ; } }
+
+       else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
+       else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
+
 
 
     }

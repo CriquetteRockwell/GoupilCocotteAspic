@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MoveRenard : MonoBehaviour
+public class MovePoule : MonoBehaviour
 {
     private UnityEngine.AI.NavMeshAgent agent;
     private UnityEngine.AI.NavMeshHit hit;
     public float range = 10.0f;
     public float sightRange = 20.0f;
-    public float sightAngle = 180.0f;
+    public float sightAngle = 360.0f;
     public float pondAppetit = 0.5f ;
     public float pondPeur = 0.5f;
     //public Vector3 point;
