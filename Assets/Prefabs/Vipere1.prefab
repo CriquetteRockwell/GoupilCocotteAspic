@@ -237,5 +237,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 722bdb4c832ef95499ccb1e22154ffde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
-  randomPoint: {x: 0, y: 0, z: 0}
+  range: 10
+  sightRange: 20
+  sightAngle: 170
+  pondAppetit: 0.5
+  pondPeur: 0.5

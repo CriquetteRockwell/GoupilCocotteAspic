@@ -4,39 +4,42 @@ using UnityEngine;
 
 public class MovePoule : MonoBehaviour
 {
-    private UnityEngine.AI.NavMeshAgent agent;
-    private UnityEngine.AI.NavMeshHit hit;
-    public float range = 10.0f;
-    public float sightRange = 20.0f;
-    public float sightAngle = 360.0f;
-    public float pondAppetit = 0.5f ;
-    public float pondPeur = 0.5f;
-    //public Vector3 point;
-    private Vector3 direction;
-    private Vector3 distance ;
-    private bool prisEnChasse ;
-    private bool enChasse ;
+  private UnityEngine.AI.NavMeshAgent agent;
+  private UnityEngine.AI.NavMeshHit hit;
+  public float range = 10.0f;
+  public float sightRange = 15.0f;
+  public float sightAngle = 170.0f;
+  public float pondAppetit = 0.5f ;
+  public float pondPeur = 0.5f;
+
+  //public Vector3 point;
+  private Vector3 direction;
+  private Vector3 distance ;
+  private bool prisEnChasse ;
+  private bool enChasse ;
 
 
-    private GameObject[] renardList ;
-    private GameObject renard ;
+  private GameObject[] predatorList ;
+  private GameObject predator ;
 
-    private GameObject[] vipereList ;
-    private GameObject vipere ;
+  private GameObject[] preyList ;
+  private GameObject prey ;
 
-    private Vector3 homeVipere ;
+  private Vector3 homePoule ;
+  private string tagPrey = "Vipere1";
+  private string tagPredator = "Renard1";
 
 
 
     void Start()
     {
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        renardList = GameObject.FindGameObjectsWithTag("Renard1");
-        vipereList = GameObject.FindGameObjectsWithTag("Vipere1");
-        homeVipere = new Vector3(- 15.0f, - 15.0f, 0.0f);
+        predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
+        preyList = GameObject.FindGameObjectsWithTag(tagPrey);
+        homePoule = new Vector3(- 15.0f,  15.0f, 0.0f);
         enChasse = false;
         prisEnChasse = false;
-        // Vector3 point = renard.transform.position;
+        // Vector3 point = predator.transform.position;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -70,10 +73,10 @@ public class MovePoule : MonoBehaviour
           agent.SetDestination(point);
     }
 
-    bool AwayPoint(Vector3 predator, float range, out Vector3 result)
+    bool AwayPoint(Vector3 predatorPosition, float range, out Vector3 result)
     {
         // Gets a vector that points from the player's position to the target's.
-        distance = predator - transform.position;
+        distance = predatorPosition - transform.position;
         direction = distance.normalized;
         Vector3 cible = - direction * range;
         UnityEngine.AI.NavMeshHit hit;
@@ -86,56 +89,79 @@ public class MovePoule : MonoBehaviour
         return false;
     }
 
-    bool CibleEnVue(out Vector3 result)
+    Transform getClosest(List<GameObject> preyVisibleList)
     {
-      var distancePrey = ( transform.position - vipereList[0].transform.position ).magnitude;
-      result = vipereList[0].transform.position;
-        for (int i = 0; i < vipereList.Length; i++)
-        {
-            GameObject vipere = vipereList[i];
-            // on teste si la vipere est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-            if ( ((vipere.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(vipere.transform.position - agent.transform.position, agent.transform.forward) < sightAngle)  /* && (( transform.position - vipere.transform.position ).magnitude< distancePrey) */) {
-
-              distancePrey = (transform.position - vipere.transform.position ).magnitude ; // on donne la nouvelle valeur à comparer
-              result = vipere.transform.position;
-              enChasse = true;
-
-            } else  {
-              result = Vector3.zero;
-              enChasse = false ;
-              return false;
-            }
+      // initialisation
+      var ecart = transform.position - preyVisibleList[0].transform.position;
+      var distance = ecart.magnitude;
+      var result = preyList[0].transform;
+      foreach (GameObject preyVisible in preyVisibleList)
+      {
+          if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
+          {
+            ecart = transform.position - preyVisible.transform.position ;
+            distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
+            result=preyVisible.transform ; // on définie la proie la plus proche
+          }
         }
-      return enChasse;
+        // resultat final
+      return result;
     }
 
-    /*Vector3 cibleDir = vipere.transform.position - agent.transform.position;
+    bool CibleEnVue(out Vector3 result)
+    {
+      if(preyList.transform.childCount != 0){
+      var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
+      result = preyList[0].transform.position;
+    }
+      List<GameObject> preyVisibleList = new List<GameObject>();
+        for (int i = 0; i < preyList.Length; i++)
+        {
+            GameObject prey = preyList[i];
+            // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
+            if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle))
+              {
+                enChasse = true ;
+                preyVisibleList.Add(prey) ;
+
+              } else  {
+
+                result = Vector3.zero;
+                enChasse = false ;
+              }
+        }
+        Transform tempResult = getClosest(preyVisibleList);
+        result = tempResult.position ;
+        return enChasse;
+    }
+
+    /*Vector3 cibleDir = prey.transform.position - agent.transform.position;
     // on teste si la proie est devant le prédateur
-    if (Vector3.Angle(vipere.transform.position - agent.transform.position, agent.transform.forward) < sightAngle)
+    if (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle)
     {
 
       print("Oh my god a fat jucy chick");
       // on prend la proie la plus proche
-      if ((vipere.transform.position - agent.transform.position).magnitude < distancePrey)
+      if ((prey.transform.position - agent.transform.position).magnitude < distancePrey)
       {
-        distancePrey = (transform.position - vipere.transform.position ).magnitude ; // on donne la nouvelle valeur à comparer
-        result = vipere.transform.position;
+        distancePrey = (transform.position - prey.transform.position ).magnitude ; // on donne la nouvelle valeur à comparer
+        result = prey.transform.position;
       }
     }
 }*/
 
     bool prisPourCible(out Vector3 result)
     {
-        for (int i = 0; i < renardList.Length; i++)
+        for (int i = 0; i < predatorList.Length; i++)
         {
-            GameObject renard = renardList[i];
-            if ( (renard.transform.position - agent.transform.position).magnitude < sightRange)
+            GameObject predator = predatorList[i];
+            if ( (predator.transform.position - agent.transform.position).magnitude < sightRange)
             {
-                Vector3 cibleDir = renard.transform.position - agent.transform.position;
+                Vector3 cibleDir = predator.transform.position - agent.transform.position;
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
                 {
-                    result = renard.transform.position;
-                    print("Oh god un renard");
+                    result = predator.transform.position;
+                    print("Oh god une vipère");
                     prisEnChasse = true;
                     return true;
                 }
@@ -157,7 +183,7 @@ public class MovePoule : MonoBehaviour
     {
         if (RandomPoint(transform.position, range, out Vector3 point))
         {
-          if ((!agent.pathPending) && (agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
+          if (/*(!agent.pathPending) && */(agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
             {
               if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
               {
@@ -170,40 +196,41 @@ public class MovePoule : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-      if (collision.gameObject.tag=="Vipere1")
+      if (collision.gameObject.tag==tagPrey)
         {
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
-          collision.gameObject.transform.position = homeVipere ;
-          //print("just teleported");
+          collision.gameObject.transform.position = homePoule ;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-      renardList = GameObject.FindGameObjectsWithTag("Renard1");
-      vipereList = GameObject.FindGameObjectsWithTag("Vipere1");
-      enChasse = CibleEnVue(out Vector3 prey);
-      prisEnChasse = prisPourCible(out Vector3 predator);
+      predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
+      preyList = GameObject.FindGameObjectsWithTag(tagPrey);
+      enChasse = CibleEnVue(out Vector3 preyPosition);
+      prisEnChasse = prisPourCible(out Vector3 predatorPosition);
+ Debug.Log("prisEnChasse" + prisEnChasse);
+Debug.Log("enChasse" + enChasse);
+        if( enChasse && prisEnChasse ) {
+          if  (Vector3.Distance(preyPosition,transform.position)*pondAppetit > Vector3.Distance(predatorPosition,transform.position)*pondPeur) // mode intermédiaire
+               {  RunAfter(preyPosition) ; }
+          else {  RunAway( predatorPosition) ; } }
+      else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
+      else if (enChasse == true && prisEnChasse == false) {   RunAfter( preyPosition) ; } // mode chasse
+      else if (enChasse == false && prisEnChasse == true) {   RunAway( predatorPosition) ; } // mode fuite
 
-      if( enChasse && prisEnChasse ) {
-        if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
-             {  RunAfter(prey) ; }
-        else {  RunAway( predator) ; } }
-    else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
-    else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
-    else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
+      // if( enChasse && prisEnChasse ) {
+      //   if  (Vector3.Distance(preyPosition,transform.position)*pondAppetit > Vector3.Distance(predatorPosition,transform.position)*pondPeur) // mode intermédiaire
+      //        {  RunAfter(preyPosition) ; }
+      //   else {  RunAfter(preyPosition) ; } }
+      // else if (enChasse == false && prisEnChasse == false) {    RunAfter(preyPosition) ; } // mode balade
+      // else if (enChasse == true && prisEnChasse == false) {   RunAfter( preyPosition) ; } // mode chasse
+      // else if (enChasse == false && prisEnChasse == true) {   RunAfter(preyPosition) ; } // mode fuite
 
-    // if( enChasse && prisEnChasse ) {
-    //   if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
-    //        {  RunAfter(prey) ; }
-    //   else {  RunAfter(prey) ; } }
-    // else if (enChasse == false && prisEnChasse == false) {    RunAfter(prey) ; } // mode balade
-    // else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
-    // else if (enChasse == false && prisEnChasse == true) {   RunAfter(prey) ; } // mode fuite
 
 
 
     }
-  }
+}

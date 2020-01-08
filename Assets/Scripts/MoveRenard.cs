@@ -7,8 +7,8 @@ public class MoveRenard : MonoBehaviour
     private UnityEngine.AI.NavMeshAgent agent;
     private UnityEngine.AI.NavMeshHit hit;
     public float range = 10.0f;
-    public float sightRange = 20.0f;
-    public float sightAngle = 180.0f;
+    public float sightRange = 15.0f;
+    public float sightAngle = 170.0f;
     public float pondAppetit = 0.5f ;
     public float pondPeur = 0.5f;
 
