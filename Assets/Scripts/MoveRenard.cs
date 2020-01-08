@@ -95,7 +95,7 @@ public class MoveRenard : MonoBehaviour
         {
             GameObject poule = pouleList[i];
             // on teste si la poule est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-            if ( ((poule.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(poule.transform.position - agent.transform.position, agent.transform.forward) < sightAngle) && ((poule.transform.position - agent.transform.position).magnitude < distancePrey) ) {
+            if ( ((poule.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(poule.transform.position - agent.transform.position, agent.transform.forward) < sightAngle) /*&& (( transform.position - poule.transform.position ).magnitude < distancePrey) */) {
 
               distancePrey = (transform.position - poule.transform.position ).magnitude ; // on donne la nouvelle valeur à comparer
               result = poule.transform.position;
@@ -187,14 +187,22 @@ public class MoveRenard : MonoBehaviour
       enChasse = CibleEnVue(out Vector3 prey);
       prisEnChasse = prisPourCible(out Vector3 predator);
 
-      if( enChasse && prisEnChasse ) {
+        if( enChasse && prisEnChasse ) {
           if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
-             {  RunAfter(prey) ; }
-         else {  RunAway(predator) ; } }
+               {  RunAfter(prey) ; }
+          else {  RunAway( predator) ; } }
+      else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
+      else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
+      else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
 
-       else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
-       else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
-       else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
+      // if( enChasse && prisEnChasse ) {
+      //   if  (Vector3.Distance(prey,transform.position)*pondAppetit > Vector3.Distance(predator,transform.position)*pondPeur) // mode intermédiaire
+      //        {  RunAfter(prey) ; }
+      //   else {  RunAfter(prey) ; } }
+      // else if (enChasse == false && prisEnChasse == false) {    RunAfter(prey) ; } // mode balade
+      // else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
+      // else if (enChasse == false && prisEnChasse == true) {   RunAfter(prey) ; } // mode fuite
+
 
 
 
