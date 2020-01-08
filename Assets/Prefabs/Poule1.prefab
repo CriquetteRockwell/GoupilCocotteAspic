@@ -109,9 +109,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   range: 10
   sightRange: 15
-  sightAngle: 360
+  sightAngle: 170
   pondAppetit: 0.5
-  pondPeur: 0.5
+  pondPeur: 5
 --- !u!54 &1636395277755467052
 Rigidbody:
   m_ObjectHideFlags: 0
