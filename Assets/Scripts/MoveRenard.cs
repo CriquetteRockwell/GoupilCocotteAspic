@@ -101,6 +101,9 @@ public class MoveRenard : MonoBehaviour
               result = poule.transform.position;
               enChasse = true;
 
+
+
+
             } else  {
               result = Vector3.zero;
               enChasse = false ;
