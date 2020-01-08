@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   range: 10
-  sightRange: 30
+  sightRange: 15
   sightAngle: 360
   pondAppetit: 0.5
   pondPeur: 0.5

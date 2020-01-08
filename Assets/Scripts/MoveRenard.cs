@@ -158,7 +158,7 @@ public class MoveRenard : MonoBehaviour
     {
         if (RandomPoint(transform.position, range, out Vector3 point))
         {
-          if ((!agent.pathPending) && (agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
+          if (/*(!agent.pathPending) && */(agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
             {
               if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
               {
@@ -192,6 +192,7 @@ public class MoveRenard : MonoBehaviour
              {  RunAfter(prey) ; }
          else {  RunAway(predator) ; } }
 
+       else if (enChasse == false && prisEnChasse == false) {    FreeWalk() ; } // mode balade
        else if (enChasse == true && prisEnChasse == false) {   RunAfter( prey) ; } // mode chasse
        else if (enChasse == false && prisEnChasse == true) {   RunAway( predator) ; } // mode fuite
 
