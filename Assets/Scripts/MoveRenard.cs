@@ -16,6 +16,9 @@ public class MoveRenard : MonoBehaviour
     private Vector3 direction;
     private Vector3 distance ;
     private Vector3 destination ;
+    private Vector3 PointHitRay ;
+    private Vector3 normalToSurface ;
+    private Vector3 directionRay ;
     private bool prisEnChasse ;
     private bool enChasse ;
     [HideInInspector] // Hides var below
@@ -30,6 +33,8 @@ public class MoveRenard : MonoBehaviour
 
     private string tagPrey = "Poule1";
     private string tagPredator = "Vipere1";
+
+    private float offsetFromWall = 8.0f ;
 
     private Vector3 homePoule = new Vector3( 15.0f,  0.0f, 0.0f);
     private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
@@ -75,11 +80,14 @@ public class MoveRenard : MonoBehaviour
           layerMask = ~layerMask;
           RaycastHit hitRay;
           float distanceRay = Vector3.Distance(transform.position,goal);
-          Vector3 directionRay = goal - transform.position;
+          directionRay = goal - transform.position;
 
           if (Physics.Raycast(transform.position, directionRay, out hitRay, distanceRay, layerMask))
           {
-            goal = hitRay.point + offset;
+            PointHitRay = hitRay.point ;
+            normalToSurface = hitRay.normal ;
+            goal = Vector3.Reflect(directionRay.normalized, normalToSurface) * offsetFromWall ;
+
           }
             destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
             Debug.DrawRay(destination, Vector3.up, Color.red, 1.0f);
