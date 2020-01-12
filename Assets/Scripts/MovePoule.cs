@@ -23,9 +23,11 @@ public class MovePoule : MonoBehaviour
   private GameObject predator ;
 
   private GameObject[] preyList ;
+  //private GameObject[] preyVisibleList ;
   private GameObject prey ;
 
-  private Vector3 homePoule ;
+  private Vector3 homeVipere = new Vector3( 0.0f,  15.0f, 0.0f);
+  private Vector3 homePoule = new Vector3( 15.0f,  0.0f, 0.0f);
   private string tagPrey = "Vipere1";
   private string tagPredator = "Renard1";
 
@@ -36,7 +38,7 @@ public class MovePoule : MonoBehaviour
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
         preyList = GameObject.FindGameObjectsWithTag(tagPrey);
-        homePoule = new Vector3(- 15.0f,  15.0f, 0.0f);
+        //Debug.Log("preyList = " + preyList.Length);
         enChasse = false;
         prisEnChasse = false;
         // Vector3 point = predator.transform.position;
@@ -89,50 +91,61 @@ public class MovePoule : MonoBehaviour
         return false;
     }
 
-    Transform getClosest(List<GameObject> preyVisibleList)
-    {
-      // initialisation
-      var ecart = transform.position - preyVisibleList[0].transform.position;
-      var distance = ecart.magnitude;
-      var result = preyList[0].transform;
-      foreach (GameObject preyVisible in preyVisibleList)
-      {
-          if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
-          {
-            ecart = transform.position - preyVisible.transform.position ;
-            distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
-            result=preyVisible.transform ; // on définie la proie la plus proche
-          }
-        }
-        // resultat final
-      return result;
-    }
-
     bool CibleEnVue(out Vector3 result)
     {
-      if(preyList.transform.childCount != 0){
-      var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
-      result = preyList[0].transform.position;
+      if(preyList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
+        var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
+        //result = preyList[0].transform.position;
+        //System.Array.clear(preyVisibleList,0,preyVisibleList.length);
+        List<GameObject> preyVisibleList = new List<GameObject>();
+
+          for (int i = 0; i < preyList.Length; i++)
+          {
+              GameObject prey = preyList[i];
+              // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
+              if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle))
+                {
+                  enChasse = true ;
+                  preyVisibleList.Add(prey) ;
+
+                } else  {
+
+                  result = Vector3.zero;
+                  enChasse = false ;
+                }
+          }
+          Transform tempResult = getClosest(preyVisibleList);
+          result = tempResult.position ;
+          return enChasse;
+      }
+      else
+      { result = new Vector3 (0.0f,0.0f,0.0f);
+        enChasse=false;
+        return enChasse;}
     }
-      List<GameObject> preyVisibleList = new List<GameObject>();
-        for (int i = 0; i < preyList.Length; i++)
+
+    Transform getClosest(List<GameObject> preyVisibleList)
+    {
+      if(preyVisibleList.Count != 0){
+      // initialisation
+        var ecart = transform.position - preyVisibleList[0].transform.position;
+        var distance = ecart.magnitude;
+        var result = preyList[0].transform;
+        foreach (GameObject preyVisible in preyVisibleList)
         {
-            GameObject prey = preyList[i];
-            // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-            if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle))
-              {
-                enChasse = true ;
-                preyVisibleList.Add(prey) ;
-
-              } else  {
-
-                result = Vector3.zero;
-                enChasse = false ;
-              }
-        }
-        Transform tempResult = getClosest(preyVisibleList);
-        result = tempResult.position ;
-        return enChasse;
+            if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
+            {
+              ecart = transform.position - preyVisible.transform.position ;
+              distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
+              result = preyVisible.transform ; // on définie la proie la plus proche
+            }
+          }
+          // resultat final
+        return result;
+      }
+      else
+      { var result = transform;
+        return result; }
     }
 
     /*Vector3 cibleDir = prey.transform.position - agent.transform.position;
@@ -161,7 +174,7 @@ public class MovePoule : MonoBehaviour
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
                 {
                     result = predator.transform.position;
-                    print("Oh god une vipère");
+                    //print("Oh god une vipère");
                     prisEnChasse = true;
                     return true;
                 }
@@ -200,8 +213,14 @@ public class MovePoule : MonoBehaviour
         {
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
-          collision.gameObject.transform.position = homePoule ;
+          collision.gameObject.transform.position = homeVipere ;
         }
+        else if (collision.gameObject.tag==tagPredator)
+            {
+              //agent.SetDestination(new Vector3(0,0,0));
+              // Destroy(collision.gameObject);
+            agent.SetDestination(homePoule);
+            }
     }
 
     // Update is called once per frame
@@ -211,8 +230,8 @@ public class MovePoule : MonoBehaviour
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
- Debug.Log("prisEnChasse" + prisEnChasse);
-Debug.Log("enChasse" + enChasse);
+ //Debug.Log("prisEnChasse : " + prisEnChasse);
+//Debug.Log("enChasse : " + enChasse);
         if( enChasse && prisEnChasse ) {
           if  (Vector3.Distance(preyPosition,transform.position)*pondAppetit > Vector3.Distance(predatorPosition,transform.position)*pondPeur) // mode intermédiaire
                {  RunAfter(preyPosition) ; }

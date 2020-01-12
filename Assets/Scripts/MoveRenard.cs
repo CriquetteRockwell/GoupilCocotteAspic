@@ -25,9 +25,12 @@ public class MoveRenard : MonoBehaviour
     private GameObject[] preyList ;
     private GameObject prey ;
 
-    private Vector3 homePoule ;
     private string tagPrey = "Poule1";
     private string tagPredator = "Vipere1";
+
+    private Vector3 homePoule = new Vector3( 15.0f,  0.0f, 0.0f);
+    private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
+
 
 
 
@@ -36,7 +39,6 @@ public class MoveRenard : MonoBehaviour
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
         preyList = GameObject.FindGameObjectsWithTag(tagPrey);
-        homePoule = new Vector3(- 15.0f,  15.0f, 0.0f);
         enChasse = false;
         prisEnChasse = false;
         // Vector3 point = predator.transform.position;
@@ -200,6 +202,12 @@ public class MoveRenard : MonoBehaviour
           // Destroy(collision.gameObject);
           collision.gameObject.transform.position = homePoule ;
         }
+      else if (collision.gameObject.tag==tagPredator)
+          {
+            //agent.SetDestination(new Vector3(0,0,0));
+            // Destroy(collision.gameObject);
+          agent.SetDestination(homeRenard);
+          }
     }
 
     // Update is called once per frame
