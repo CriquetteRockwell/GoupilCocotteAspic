@@ -14,7 +14,7 @@ public class MoveVipereSave : MonoBehaviour
     public Vector3 point;
     private Vector3 direction;
     private Vector3 distance ;
-    private bool prisEnChasse = false;
+    private bool prisEnChasse ;
 
     private float sightRange = 20.0f;
     private float sightAngle = 180.0f;
@@ -27,6 +27,7 @@ public class MoveVipereSave : MonoBehaviour
     public Vector3 randomPoint;
     private float range = 10.0f;
     private Vector3 home = new Vector3(- 0.0f, - 0.0f, 0.0f);
+    private Vector3 destination ;
 
     // Start is called before the first frame update
     void Start()
@@ -70,8 +71,22 @@ public class MoveVipereSave : MonoBehaviour
       {
           if (AwayPoint(point, range, out Vector3 goal))
           {
+            int layerMask = 1 << 8;
+            // This would cast rays only against colliders in layer 8.
+            // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+            layerMask = ~layerMask;
+            RaycastHit hit;
+            float distanceRay = Vector3.Distance(transform.position,goal);
+            Vector3 directionRay = goal - transform.position;
+            while (Physics.Raycast(transform.position, directionRay, out hit, distanceRay, layerMask))
+            {
+              goal = goal + new Vector3(1.0f, 0.0f, 0.0f) ;
+              distanceRay = Vector3.Distance(transform.position,goal);
+              directionRay = goal - transform.position;
+            }
+              destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
               Debug.DrawRay(agent.transform.position + goal, Vector3.up, Color.red, 1.0f);
-              agent.SetDestination(agent.transform.position + goal); //le vecteur goal est appliqué depuis la position de l'agent
+              agent.SetDestination(destination);
           }
       }
 

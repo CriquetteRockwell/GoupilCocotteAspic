@@ -15,9 +15,11 @@ public class MovePoule : MonoBehaviour
   //public Vector3 point;
   private Vector3 direction;
   private Vector3 distance ;
+  private Vector3 destination ;
   private bool prisEnChasse ;
   private bool enChasse ;
-
+  [HideInInspector] // Hides var below
+  public static bool touched ;
 
   private GameObject[] predatorList ;
   private GameObject predator ;
@@ -31,6 +33,9 @@ public class MovePoule : MonoBehaviour
   private string tagPrey = "Vipere1";
   private string tagPredator = "Renard1";
 
+  private Vector3 offset = new Vector3 (1.0f, 0.0f, 0.0f) ;
+
+
 
 
     void Start()
@@ -41,6 +46,7 @@ public class MovePoule : MonoBehaviour
         //Debug.Log("preyList = " + preyList.Length);
         enChasse = false;
         prisEnChasse = false;
+        touched = false ;
         // Vector3 point = predator.transform.position;
     }
 
@@ -64,8 +70,23 @@ public class MovePoule : MonoBehaviour
     {
         if (AwayPoint(point, range, out Vector3 goal))
         {
+          int layerMask = 1 << 8;
+          // This would cast rays only against colliders in layer 8.
+          // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+          layerMask = ~layerMask;
+          RaycastHit hit;
+          float distanceRay = Vector3.Distance(transform.position,goal);
+          Vector3 directionRay = goal - transform.position;
+
+          while (Physics.Raycast(transform.position, directionRay, out hit, distanceRay, layerMask)) // pour 2viter les murs
+          {
+            goal = goal + offset; // décalage sur la droite
+            distanceRay = Vector3.Distance(transform.position,goal);
+            directionRay = goal - transform.position;
+          }
+            destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
             Debug.DrawRay(agent.transform.position + goal, Vector3.up, Color.red, 1.0f);
-            agent.SetDestination(agent.transform.position + goal); //le vecteur goal est appliqué depuis la position de l'agent
+            agent.SetDestination(destination);
         }
     }
 
@@ -214,18 +235,30 @@ public class MovePoule : MonoBehaviour
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
           collision.gameObject.transform.position = homeVipere ;
+          MoveVipere.touched = true ;
         }
-        else if (collision.gameObject.tag==tagPredator)
+        else if (collision.gameObject.tag=="Wall")
             {
               //agent.SetDestination(new Vector3(0,0,0));
               // Destroy(collision.gameObject);
-            agent.SetDestination(homePoule);
+            Debug.Log("Mur touché : ");
+
             }
     }
 
     // Update is called once per frame
     void Update()
     {
+      if (touched == true)
+      {
+        agent.isStopped = touched;
+        //agent.SetDestination(homePoule);
+        agent.ResetPath();
+        touched = false ;
+        enChasse = false;
+        prisEnChasse = false;
+        agent.isStopped = touched;
+       }
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       enChasse = CibleEnVue(out Vector3 preyPosition);

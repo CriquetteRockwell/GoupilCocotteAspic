@@ -15,8 +15,11 @@ public class MoveRenard : MonoBehaviour
     //public Vector3 point;
     private Vector3 direction;
     private Vector3 distance ;
+    private Vector3 destination ;
     private bool prisEnChasse ;
     private bool enChasse ;
+    [HideInInspector] // Hides var below
+    public static bool touched ;
 
 
     private GameObject[] predatorList ;
@@ -30,6 +33,7 @@ public class MoveRenard : MonoBehaviour
 
     private Vector3 homePoule = new Vector3( 15.0f,  0.0f, 0.0f);
     private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
+    private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
 
 
 
@@ -41,6 +45,7 @@ public class MoveRenard : MonoBehaviour
         preyList = GameObject.FindGameObjectsWithTag(tagPrey);
         enChasse = false;
         prisEnChasse = false;
+        touched = false ;
         // Vector3 point = predator.transform.position;
     }
 
@@ -64,8 +69,21 @@ public class MoveRenard : MonoBehaviour
     {
         if (AwayPoint(point, range, out Vector3 goal))
         {
-            Debug.DrawRay(agent.transform.position + goal, Vector3.up, Color.red, 1.0f);
-            agent.SetDestination(agent.transform.position + goal); //le vecteur goal est appliqué depuis la position de l'agent
+          int layerMask = 1 << 8;
+          // This would cast rays only against colliders in layer 8.
+          // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+          layerMask = ~layerMask;
+          RaycastHit hitRay;
+          float distanceRay = Vector3.Distance(transform.position,goal);
+          Vector3 directionRay = goal - transform.position;
+
+          if (Physics.Raycast(transform.position, directionRay, out hitRay, distanceRay, layerMask))
+          {
+            goal = hitRay.point + offset;
+          }
+            destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
+            Debug.DrawRay(destination, Vector3.up, Color.red, 1.0f);
+            agent.SetDestination(destination);
         }
     }
 
@@ -91,48 +109,61 @@ public class MoveRenard : MonoBehaviour
         return false;
     }
 
-    Transform getClosest(List<GameObject> preyVisibleList)
-    {
-      // initialisation
-      var ecart = transform.position - preyVisibleList[0].transform.position;
-      var distance = ecart.magnitude;
-      var result = preyList[0].transform;
-      foreach (GameObject preyVisible in preyVisibleList)
-      {
-          if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
-          {
-            ecart = transform.position - preyVisible.transform.position ;
-            distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
-            result=preyVisible.transform ; // on définie la proie la plus proche
-          }
-        }
-        // resultat final
-      return result;
-    }
-
     bool CibleEnVue(out Vector3 result)
     {
-      var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
-      result = preyList[0].transform.position;
-      List<GameObject> preyVisibleList = new List<GameObject>();
-        for (int i = 0; i < preyList.Length; i++)
+      if(preyList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
+        var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
+        //result = preyList[0].transform.position;
+        //System.Array.clear(preyVisibleList,0,preyVisibleList.length);
+        List<GameObject> preyVisibleList = new List<GameObject>();
+
+          for (int i = 0; i < preyList.Length; i++)
+          {
+              GameObject prey = preyList[i];
+              // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
+              if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle))
+                {
+                  enChasse = true ;
+                  preyVisibleList.Add(prey) ;
+
+                } else  {
+
+                  result = Vector3.zero;
+                  enChasse = false ;
+                }
+          }
+          Transform tempResult = getClosest(preyVisibleList);
+          result = tempResult.position ;
+          return enChasse;
+      }
+      else
+      { result = new Vector3 (0.0f,0.0f,0.0f);
+        enChasse=false;
+        return enChasse;}
+    }
+
+    Transform getClosest(List<GameObject> preyVisibleList)
+    {
+      if(preyVisibleList.Count != 0){
+      // initialisation
+        var ecart = transform.position - preyVisibleList[0].transform.position;
+        var distance = ecart.magnitude;
+        var result = preyList[0].transform;
+        foreach (GameObject preyVisible in preyVisibleList)
         {
-            GameObject prey = preyList[i];
-            // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-            if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle))
-              {
-                enChasse = true ;
-                preyVisibleList.Add(prey) ;
-
-              } else  {
-
-                result = Vector3.zero;
-                enChasse = false ;
-              }
-        }
-        Transform tempResult = getClosest(preyVisibleList);
-        result = tempResult.position ;
-        return enChasse;
+            if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
+            {
+              ecart = transform.position - preyVisible.transform.position ;
+              distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
+              result = preyVisible.transform ; // on définie la proie la plus proche
+            }
+          }
+          // resultat final
+        return result;
+      }
+      else
+      { var result = transform;
+        return result; }
     }
 
     /*Vector3 cibleDir = prey.transform.position - agent.transform.position;
@@ -161,7 +192,7 @@ public class MoveRenard : MonoBehaviour
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
                 {
                     result = predator.transform.position;
-                    print("Oh god une vipère");
+                    // print("Oh god une vipère");
                     prisEnChasse = true;
                     return true;
                 }
@@ -186,13 +217,31 @@ public class MoveRenard : MonoBehaviour
           if (/*(!agent.pathPending) && */(agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
             {
               if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
-              {
-                Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
-                agent.SetDestination(point);
-              }
+                {
+              // Bit shift the index of the layer (8) to get a bit mask
+                int layerMask = 1 << 8;
+                // This would cast rays only against colliders in layer 8.
+                // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+                layerMask = ~layerMask;
+                RaycastHit hit;
+                float distanceRay = Vector3.Distance(transform.position,point);
+                Vector3 directionRay = point - transform.position;
+                // Does the ray intersect any objects excluding the player layer
+                if (Physics.Raycast(transform.position, directionRay, out hit, distanceRay, layerMask) == false)
+                {
+                  Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
+                  agent.SetDestination(point);
+                }
+                else
+                {
+                  print("ray touched");
+                  agent.isStopped = touched;
+                  agent.ResetPath();
+                }
             }
           }
         }
+      }
 
     void OnCollisionEnter(Collision collision)
     {
@@ -201,18 +250,31 @@ public class MoveRenard : MonoBehaviour
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
           collision.gameObject.transform.position = homePoule ;
+          MovePoule.touched = true ;
         }
-      else if (collision.gameObject.tag==tagPredator)
+      else if (collision.gameObject.tag=="Wall")
           {
             //agent.SetDestination(new Vector3(0,0,0));
             // Destroy(collision.gameObject);
-          agent.SetDestination(homeRenard);
+          Debug.Log("Mur touché : ");
+
           }
     }
 
     // Update is called once per frame
     void Update()
     {
+      if (touched == true) // Like a virgin...
+      {
+        agent.isStopped = touched;
+        agent.ResetPath();
+        touched = false ;
+        enChasse = false;
+        prisEnChasse = false;
+        agent.isStopped = touched;  // for the very first time !!!!
+       }
+
+
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       enChasse = CibleEnVue(out Vector3 preyPosition);

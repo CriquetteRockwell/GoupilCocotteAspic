@@ -15,9 +15,11 @@ public class MoveVipere : MonoBehaviour
   //public Vector3 point;
   private Vector3 direction;
   private Vector3 distance ;
+  private Vector3 destination ;
   private bool prisEnChasse ;
   private bool enChasse ;
-  private bool touched;
+  [HideInInspector] // Hides var below
+  public static bool touched ;
 
   private GameObject[] predatorList ;
   private GameObject predator ;
@@ -29,6 +31,9 @@ public class MoveVipere : MonoBehaviour
   private Vector3 homeVipere = new Vector3( 0.0f,  15.0f, 0.0f);
   private string tagPrey = "Renard1";
   private string tagPredator = "Poule1";
+
+  private Vector3 offset = new Vector3 (1.0f, 0.0f, 0.0f) ;
+
 
     // Start is called before the first frame update
     void Start()
@@ -62,8 +67,23 @@ public class MoveVipere : MonoBehaviour
     {
         if (AwayPoint(point, range, out Vector3 goal))
         {
+          int layerMask = 1 << 8;
+          // This would cast rays only against colliders in layer 8.
+          // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+          layerMask = ~layerMask;
+          RaycastHit hit;
+          float distanceRay = Vector3.Distance(transform.position,goal);
+          Vector3 directionRay = goal - transform.position;
+
+          while (Physics.Raycast(transform.position, directionRay, out hit, distanceRay, layerMask)) // pour 2viter les öurs
+          {
+            goal = goal + offset ; // décalage sur la droite
+            distanceRay = Vector3.Distance(transform.position,goal);
+            directionRay = goal - transform.position;
+          }
+            destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
             Debug.DrawRay(agent.transform.position + goal, Vector3.up, Color.red, 1.0f);
-            agent.SetDestination(agent.transform.position + goal); //le vecteur goal est appliqué depuis la position de l'agent
+            agent.SetDestination(destination);
         }
     }
 
@@ -89,32 +109,14 @@ public class MoveVipere : MonoBehaviour
         return false;
     }
 
-    Transform getClosest(List<GameObject> preyVisibleList)
-    {
-      // initialisation
-      var ecart = transform.position - preyVisibleList[0].transform.position;
-      var distance = ecart.magnitude;
-      var result = preyList[0].transform;
-      foreach (GameObject preyVisible in preyVisibleList)
-      {
-          if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
-          {
-            ecart = transform.position - preyVisible.transform.position ;
-            distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
-            result=preyVisible.transform ; // on définie la proie la plus proche
-          }
-        }
-        // resultat final
-      return result;
-    }
-
     bool CibleEnVue(out Vector3 result)
     {
       if(preyList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
         var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
-        result = preyList[0].transform.position;
-
+        //result = preyList[0].transform.position;
+        //System.Array.clear(preyVisibleList,0,preyVisibleList.length);
         List<GameObject> preyVisibleList = new List<GameObject>();
+
           for (int i = 0; i < preyList.Length; i++)
           {
               GameObject prey = preyList[i];
@@ -134,9 +136,34 @@ public class MoveVipere : MonoBehaviour
           result = tempResult.position ;
           return enChasse;
       }
-      result = new Vector3 (0.0f,0.0f,0.0f);
-      enChasse=false;
-      return enChasse;
+      else
+      { result = new Vector3 (0.0f,0.0f,0.0f);
+        enChasse=false;
+        return enChasse;}
+    }
+
+    Transform getClosest(List<GameObject> preyVisibleList)
+    {
+      if(preyVisibleList.Count != 0){
+      // initialisation
+        var ecart = transform.position - preyVisibleList[0].transform.position;
+        var distance = ecart.magnitude;
+        var result = preyList[0].transform;
+        foreach (GameObject preyVisible in preyVisibleList)
+        {
+            if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
+            {
+              ecart = transform.position - preyVisible.transform.position ;
+              distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
+              result = preyVisible.transform ; // on définie la proie la plus proche
+            }
+          }
+          // resultat final
+        return result;
+      }
+      else
+      { var result = transform;
+        return result; }
     }
 
     /*Vector3 cibleDir = prey.transform.position - agent.transform.position;
@@ -205,23 +232,30 @@ public class MoveVipere : MonoBehaviour
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
           collision.gameObject.transform.position = homeRenard ;
+          MoveRenard.touched = true ;
         }
-      else if (collision.gameObject.tag==tagPredator)
-          {
-            //agent.SetDestination(new Vector3(0,0,0));
-            // Destroy(collision.gameObject);
-          agent.SetDestination(homeVipere);
-          touched = true;
-          Debug.Log("touché : " + touched);
+        else if (collision.gameObject.tag=="Wall")
+            {
+              //agent.SetDestination(new Vector3(0,0,0));
+              // Destroy(collision.gameObject);
+            Debug.Log("Mur touché : ");
 
-          }
+            }
     }
 
     // Update is called once per frame
     void Update()
     {
-      if (touched=true)
-      {  agent.SetDestination(homeVipere); }
+      if (touched == true)
+      {
+        agent.isStopped = touched;
+        agent.ResetPath();
+        touched = false ;
+        enChasse = false;
+        prisEnChasse = false;
+        agent.isStopped = touched;
+       }
+
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       enChasse = CibleEnVue(out Vector3 preyPosition);
