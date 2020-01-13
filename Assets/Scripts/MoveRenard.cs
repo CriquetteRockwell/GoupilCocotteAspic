@@ -6,7 +6,7 @@ public class MoveRenard : MonoBehaviour
 {
     private UnityEngine.AI.NavMeshAgent agent;
     private UnityEngine.AI.NavMeshHit hit;
-    public float range = 10.0f;
+    public float range = 5.0f;
     public float sightRange = 15.0f;
     public float sightAngle = 170.0f;
     public float pondAppetit = 0.5f ;
@@ -16,9 +16,11 @@ public class MoveRenard : MonoBehaviour
     private Vector3 direction;
     private Vector3 distance ;
     private Vector3 destination ;
-    private Vector3 PointHitRay ;
-    private Vector3 normalToSurface ;
     private Vector3 directionRay ;
+    private float offsetFromWall = 4.0f ;
+    private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
+
+
     private bool prisEnChasse ;
     private bool enChasse ;
     [HideInInspector] // Hides var below
@@ -34,11 +36,8 @@ public class MoveRenard : MonoBehaviour
     private string tagPrey = "Poule1";
     private string tagPredator = "Vipere1";
 
-    private float offsetFromWall = 8.0f ;
-
     private Vector3 homePoule = new Vector3( 15.0f,  0.0f, 0.0f);
     private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
-    private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
 
 
 
@@ -74,26 +73,51 @@ public class MoveRenard : MonoBehaviour
     {
         if (AwayPoint(point, range, out Vector3 goal))
         {
-          int layerMask = 1 << 8;
+           LayerMask mask = LayerMask.GetMask("Wall");
+           destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
           // This would cast rays only against colliders in layer 8.
           // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
-          layerMask = ~layerMask;
-          RaycastHit hitRay;
-          float distanceRay = Vector3.Distance(transform.position,goal);
-          directionRay = goal - transform.position;
+          float distanceRay = Vector3.Distance(transform.position,destination);
+          bool hitForward = Physics.Raycast(agent.transform.position, agent.transform.forward, out RaycastHit hitRayForward, distanceRay, mask);
+          bool hitLeft = Physics.Raycast(agent.transform.position, -agent.transform.right, out RaycastHit hitRayLeft, distanceRay, mask) ;
+          bool hitRight = Physics.Raycast(agent.transform.position, agent.transform.right, out RaycastHit hitRayRight, distanceRay, mask) ;
 
-          if (Physics.Raycast(transform.position, directionRay, out hitRay, distanceRay, layerMask))
+          if (hitForward)
           {
-            PointHitRay = hitRay.point ;
-            normalToSurface = hitRay.normal ;
-            goal = Vector3.Reflect(directionRay.normalized, normalToSurface) * offsetFromWall ;
+            Debug.Log("Wall straight ahead ");
+            if (hitRight)
+            {
+              if (hitLeft && (hitRayLeft.distance < hitRayRight.distance ))
+              {
+                Debug.Log("Wall to the right as well ");
+                destination = goal + agent.transform.position + agent.transform.right * offsetFromWall * 2.0f;
+              }
+              else
+              {
+                Debug.Log("Wall to the right as well ");
+                destination = goal + agent.transform.position - agent.transform.right * offsetFromWall * 2.0f;
+              }
+            }
+            else if (hitLeft)
+            {
+                Debug.Log("Wall to the left as well ");
+                destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
+            }
 
           }
-            destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
+          else if (hitRight)
+          {
+            destination = goal + agent.transform.position - agent.transform.right * offsetFromWall;
+          }
+
+          else if (hitLeft)
+          {
+            destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
+          }
             Debug.DrawRay(destination, Vector3.up, Color.red, 1.0f);
             agent.SetDestination(destination);
         }
-    }
+      }
 
     void RunAfter(Vector3 point)
     {
@@ -222,7 +246,7 @@ public class MoveRenard : MonoBehaviour
     {
         if (RandomPoint(transform.position, range, out Vector3 point))
         {
-          if (/*(!agent.pathPending) && */(agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
+          if ((agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
             {
               if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
                 {
@@ -242,9 +266,7 @@ public class MoveRenard : MonoBehaviour
                 }
                 else
                 {
-                  print("ray touched");
-                  agent.isStopped = touched;
-                  agent.ResetPath();
+                  print("ray touched") ;
                 }
             }
           }

@@ -6,7 +6,7 @@ public class MoveVipere : MonoBehaviour
 {
   private UnityEngine.AI.NavMeshAgent agent;
   private UnityEngine.AI.NavMeshHit hit;
-  public float range = 10.0f;
+  public float range = 5.0f;
   public float sightRange = 15.0f;
   public float sightAngle = 170.0f;
   public float pondAppetit = 0.5f ;
@@ -16,10 +16,16 @@ public class MoveVipere : MonoBehaviour
   private Vector3 direction;
   private Vector3 distance ;
   private Vector3 destination ;
+  private Vector3 directionRay ;
+  private float offsetFromWall = 4.0f ;
+  private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
+
+
   private bool prisEnChasse ;
   private bool enChasse ;
   [HideInInspector] // Hides var below
   public static bool touched ;
+
 
   private GameObject[] predatorList ;
   private GameObject predator ;
@@ -27,12 +33,12 @@ public class MoveVipere : MonoBehaviour
   private GameObject[] preyList ;
   private GameObject prey ;
 
-  private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
-  private Vector3 homeVipere = new Vector3( 0.0f,  15.0f, 0.0f);
   private string tagPrey = "Renard1";
   private string tagPredator = "Poule1";
 
-  private Vector3 offset = new Vector3 (1.0f, 0.0f, 0.0f) ;
+  private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
+  private Vector3 homeVipere = new Vector3( 0.0f,  15.0f, 0.0f);
+
 
 
     // Start is called before the first frame update
@@ -67,25 +73,51 @@ public class MoveVipere : MonoBehaviour
     {
         if (AwayPoint(point, range, out Vector3 goal))
         {
-          int layerMask = 1 << 8;
+           LayerMask mask = LayerMask.GetMask("Wall");
+           destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
           // This would cast rays only against colliders in layer 8.
           // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
-          layerMask = ~layerMask;
-          RaycastHit hit;
-          float distanceRay = Vector3.Distance(transform.position,goal);
-          Vector3 directionRay = goal - transform.position;
+          float distanceRay = Vector3.Distance(transform.position,destination);
+          bool hitForward = Physics.Raycast(agent.transform.position, agent.transform.forward, out RaycastHit hitRayForward, distanceRay, mask);
+          bool hitLeft = Physics.Raycast(agent.transform.position, -agent.transform.right, out RaycastHit hitRayLeft, distanceRay, mask) ;
+          bool hitRight = Physics.Raycast(agent.transform.position, agent.transform.right, out RaycastHit hitRayRight, distanceRay, mask) ;
 
-          while (Physics.Raycast(transform.position, directionRay, out hit, distanceRay, layerMask)) // pour 2viter les öurs
+          if (hitForward)
           {
-            goal = goal + offset ; // décalage sur la droite
-            distanceRay = Vector3.Distance(transform.position,goal);
-            directionRay = goal - transform.position;
+            Debug.Log("Wall straight ahead ");
+            if (hitRight)
+            {
+              if (hitLeft && (hitRayLeft.distance < hitRayRight.distance ))
+              {
+                Debug.Log("Wall to the right as well ");
+                destination = goal + agent.transform.position + agent.transform.right * offsetFromWall * 2.0f;
+              }
+              else
+              {
+                Debug.Log("Wall to the right as well ");
+                destination = goal + agent.transform.position - agent.transform.right * offsetFromWall * 2.0f;
+              }
+            }
+            else if (hitLeft)
+            {
+                Debug.Log("Wall to the left as well ");
+                destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
+            }
+
           }
-            destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
-            Debug.DrawRay(agent.transform.position + goal, Vector3.up, Color.red, 1.0f);
+          else if (hitRight)
+          {
+            destination = goal + agent.transform.position - agent.transform.right * offsetFromWall;
+          }
+
+          else if (hitLeft)
+          {
+            destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
+          }
+            Debug.DrawRay(destination, Vector3.up, Color.red, 1.0f);
             agent.SetDestination(destination);
         }
-    }
+      }
 
     void RunAfter(Vector3 point)
     {
@@ -214,16 +246,32 @@ public class MoveVipere : MonoBehaviour
     {
         if (RandomPoint(transform.position, range, out Vector3 point))
         {
-          if (/*(!agent.pathPending) && */(agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
+          if ((agent.remainingDistance <= agent.stoppingDistance)) // si l'agent est immobile
             {
               if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
-              {
-                Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
-                agent.SetDestination(point);
-              }
+                {
+              // Bit shift the index of the layer (8) to get a bit mask
+                int layerMask = 1 << 8;
+                // This would cast rays only against colliders in layer 8.
+                // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
+                layerMask = ~layerMask;
+                RaycastHit hit;
+                float distanceRay = Vector3.Distance(transform.position,point);
+                Vector3 directionRay = point - transform.position;
+                // Does the ray intersect any objects excluding the player layer
+                if (Physics.Raycast(transform.position, directionRay, out hit, distanceRay, layerMask) == false)
+                {
+                  Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
+                  agent.SetDestination(point);
+                }
+                else
+                {
+                  print("ray touched") ;
+                }
             }
           }
         }
+      }
 
     void OnCollisionEnter(Collision collision)
     {
