@@ -217,10 +217,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   range: 10
-  sightRange: 15
+  sightRange: 10
   sightAngle: 170
-  pondAppetit: 0.5
-  pondPeur: 5
+  pondAppetit: 5
+  pondPeur: 0.5
 --- !u!195 &4504397579359569202
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public class MoveVipere : MonoBehaviour
 {
   private UnityEngine.AI.NavMeshAgent agent;
@@ -24,8 +26,9 @@ public class MoveVipere : MonoBehaviour
   private bool prisEnChasse ;
   private bool enChasse ;
   [HideInInspector] // Hides var below
-  public static bool touched ;
-
+  public bool touched ;
+  private bool preyTouched ;
+  private bool predatorTouched ;
 
   private GameObject[] predatorList ;
   private GameObject predator ;
@@ -152,8 +155,10 @@ public class MoveVipere : MonoBehaviour
           for (int i = 0; i < preyList.Length; i++)
           {
               GameObject prey = preyList[i];
+              MoveRenard controlscript = prey.GetComponent<MoveRenard>();
+              preyTouched = controlscript.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-              if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle))
+              if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle) && (predatorTouched == false) )
                 {
                   enChasse = true ;
                   preyVisibleList.Add(prey) ;
@@ -218,7 +223,9 @@ public class MoveVipere : MonoBehaviour
         for (int i = 0; i < predatorList.Length; i++)
         {
             GameObject predator = predatorList[i];
-            if ( (predator.transform.position - agent.transform.position).magnitude < sightRange)
+            MovePoule controlscript = predator.GetComponent<MovePoule>();
+            predatorTouched = controlscript.touched; // access this particular touched variable
+            if ( ((predator.transform.position - agent.transform.position).magnitude < sightRange) && (predatorTouched == false) )
             {
                 Vector3 cibleDir = predator.transform.position - agent.transform.position;
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
@@ -280,7 +287,8 @@ public class MoveVipere : MonoBehaviour
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
           collision.gameObject.transform.position = homeRenard ;
-          MoveRenard.touched = true ;
+          MoveRenard controlscript = collision.gameObject.GetComponent<MoveRenard>();
+          controlscript.touched = true; // access this particular touched variable
         }
         else if (collision.gameObject.tag=="Wall")
             {
@@ -297,11 +305,11 @@ public class MoveVipere : MonoBehaviour
       if (touched == true)
       {
         agent.isStopped = touched;
-        agent.ResetPath();
-        touched = false ;
+        //agent.ResetPath();
+        // touched = false ;
         enChasse = false;
         prisEnChasse = false;
-        agent.isStopped = touched;
+        // agent.isStopped = touched;
        }
 
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
