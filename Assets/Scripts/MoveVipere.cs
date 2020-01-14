@@ -26,7 +26,7 @@ public class MoveVipere : MonoBehaviour
 
   private bool prisEnChasse ;
   private bool enChasse ;
-  [HideInInspector] // Hides var below
+  //[HideInInspector] // Hides var below
   public bool touched ;
   private bool preyTouched ;
   private bool predatorTouched ;
@@ -41,15 +41,18 @@ public class MoveVipere : MonoBehaviour
   private GameObject prey ;
 
   private GameObject[] friendList ;
+  private GameObject[] newFriendList ;
+  private GameObject[] temporaire ;
   private GameObject friend ;
 
   private string tagPrey = "Renard1";
   private string tagPredator = "Poule1";
   private string tagFriend = "Vipere1";
-
+  private string myName ;
 
   private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
   private Vector3 homeVipere = new Vector3( 0.0f,  15.0f, 0.0f);
+
 
 
 
@@ -59,9 +62,14 @@ public class MoveVipere : MonoBehaviour
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
         preyList = GameObject.FindGameObjectsWithTag(tagPrey);
+        friendList = GameObject.FindGameObjectsWithTag(tagFriend);
+        temporaire = new GameObject[friendList.Length - 1];
+        getRidOfMyselfInFriendArray(friendList, out GameObject[] nemFriendList);
         enChasse = false;
         prisEnChasse = false;
         touched = false;
+        myName = this.name ;
+
         // Vector3 point = predator.transform.position;
     }
 
@@ -96,23 +104,23 @@ public class MoveVipere : MonoBehaviour
 
           if (hitForward)
           {
-            Debug.Log("Wall straight ahead ");
+            //Debug.Log("Wall straight ahead ");
             if (hitRight)
             {
               if (hitLeft && (hitRayLeft.distance < hitRayRight.distance ))
               {
-                Debug.Log("Wall to the right as well ");
+              //  Debug.Log("Wall to the right as well ");
                 destination = goal + agent.transform.position + agent.transform.right * offsetFromWall * 2.0f;
               }
               else
               {
-                Debug.Log("Wall to the right as well ");
+                //Debug.Log("Wall to the right as well ");
                 destination = goal + agent.transform.position - agent.transform.right * offsetFromWall * 2.0f;
               }
             }
             else if (hitLeft)
             {
-                Debug.Log("Wall to the left as well ");
+              //  Debug.Log("Wall to the left as well ");
                 destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
             }
 
@@ -135,6 +143,22 @@ public class MoveVipere : MonoBehaviour
     {
           Debug.DrawRay(point, Vector3.up, Color.green, 1.0f);
           agent.SetDestination(point);
+    }
+
+    void getRidOfMyselfInFriendArray (GameObject[] anyList, out GameObject[] gotRidList)
+    {
+          int i = 0 ;
+          foreach(GameObject item in anyList)
+          {
+            Debug.Log(item.name.Split('(')[1] );
+            Debug.Log(myName.Split('(')[1] );
+            if ((item.name.Split('(')[1] ) != (myName.Split('(')[1]) )
+            {
+              temporaire[i]=friend;
+              i = i + 1 ;
+            }
+          }
+          gotRidList = temporaire ;
     }
 
     bool AwayPoint(Vector3 predatorPosition, float range, out Vector3 result)
@@ -190,8 +214,7 @@ public class MoveVipere : MonoBehaviour
 
     bool AmiArreteEnVue(out Vector3 result)
     {
-      if(friendList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
-        var distanceFriend = ( transform.position - friendList[0].transform.position ).magnitude;
+      if((friendList.Length -1 )!= 0) {  // test seulement dans le cas ou la poule est seule (test unitaire)
         //result = preyList[0].transform.position;
         //System.Array.clear(preyVisibleList,0,preyVisibleList.length);
         List<GameObject> friendArreteList = new List<GameObject>();
@@ -271,11 +294,6 @@ public class MoveVipere : MonoBehaviour
         return false;
     }
 
-    /*void Chase()
-    {
-        if ()
-    }
-    */
 
 
 
@@ -303,7 +321,7 @@ public class MoveVipere : MonoBehaviour
                 }
                 else
                 {
-                  print("ray touched") ;
+                  //print("ray touched") ;
                 }
             }
           }
@@ -317,18 +335,18 @@ public class MoveVipere : MonoBehaviour
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
           MoveRenard controlscript = collision.gameObject.GetComponent<MoveRenard>();
-          if (controlscript.touched = false)
+          if (controlscript.touched == false)
           {
             controlscript.touched = true; // access this particular touched variable
             collision.gameObject.transform.position = homeRenard ;
           }
 
         }
-        else if (collision.gameObject.tag=="Wall")
+        else if (collision.gameObject.tag =="Wall")
             {
               //agent.SetDestination(new Vector3(0,0,0));
               // Destroy(collision.gameObject);
-            Debug.Log("Mur touché : ");
+            //Debug.Log("Mur touché : ");
 
             }
     }
@@ -336,17 +354,17 @@ public class MoveVipere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       friendList = GameObject.FindGameObjectsWithTag(tagFriend);
       jeNeSuisPasSeul = AmiArreteEnVue(out Vector3 friendPosition);
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
+      Debug.Log("iueshfiuf" + myName);
 
       if (touched == true)
       {
+        Debug.Log("jeNeSuisPasSeul : " + jeNeSuisPasSeul);
         if (jeNeSuisPasSeul)
         {
           RunAfter(friendPosition);

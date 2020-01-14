@@ -96,23 +96,23 @@ public class MovePoule : MonoBehaviour
 
           if (hitForward)
           {
-            Debug.Log("Wall straight ahead ");
+            //Debug.Log("Wall straight ahead ");
             if (hitRight)
             {
               if (hitLeft && (hitRayLeft.distance < hitRayRight.distance ))
               {
-                Debug.Log("Wall to the right as well ");
+                //Debug.Log("Wall to the right as well ");
                 destination = goal + agent.transform.position + agent.transform.right * offsetFromWall * 2.0f;
               }
               else
               {
-                Debug.Log("Wall to the right as well ");
+                //Debug.Log("Wall to the right as well ");
                 destination = goal + agent.transform.position - agent.transform.right * offsetFromWall * 2.0f;
               }
             }
             else if (hitLeft)
             {
-                Debug.Log("Wall to the left as well ");
+                //Debug.Log("Wall to the left as well ");
                 destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
             }
 
@@ -164,8 +164,8 @@ public class MovePoule : MonoBehaviour
           for (int i = 0; i < friendList.Length; i++)
           {
               GameObject friend = friendList[i];
-              MovePoule controlscript = friend.GetComponent<MovePoule>();
-              friendTouched = controlscript.touched; // access this particular touched variable
+              MovePoule controlTouchedFriend = friend.GetComponent<MovePoule>();
+              friendTouched = controlTouchedFriend.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
               if ( friendTouched == false )
                 {
@@ -198,8 +198,8 @@ public class MovePoule : MonoBehaviour
           for (int i = 0; i < preyList.Length; i++)
           {
               GameObject prey = preyList[i];
-              MoveVipere controlscript = prey.GetComponent<MoveVipere>();
-              preyTouched = controlscript.touched; // access this particular touched variable
+              MoveVipere controlTouchedPrey = prey.GetComponent<MoveVipere>();
+              preyTouched = controlTouchedPrey.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
               if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle) && (preyTouched == false))
                 {
@@ -253,8 +253,8 @@ public class MovePoule : MonoBehaviour
         for (int i = 0; i < predatorList.Length; i++)
         {
             GameObject predator = predatorList[i];
-            MoveRenard controlscript = predator.GetComponent<MoveRenard>();
-            predatorTouched = controlscript.touched; // access this particular touched variable
+            MoveRenard controlPredatorPredator = predator.GetComponent<MoveRenard>();
+            predatorTouched = controlPredatorPredator.touched; // access this particular touched variable
             if ( ((predator.transform.position - agent.transform.position).magnitude < sightRange) && (predatorTouched == false) )
             {
                 Vector3 cibleDir = predator.transform.position - agent.transform.position;
@@ -298,7 +298,7 @@ public class MovePoule : MonoBehaviour
                 }
                 else
                 {
-                  print("ray touched") ;
+                  // print("ray touched") ;
                 }
             }
           }
@@ -307,22 +307,30 @@ public class MovePoule : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-      if (collision.gameObject.tag==tagPrey)
+      if (collision.gameObject.tag == tagPrey)
         {
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
-          MoveVipere controlscript = collision.gameObject.GetComponent<MoveVipere>();
-          if (controlscript.touched = false)
+          MoveVipere controlCollisionPrey = collision.gameObject.GetComponent<MoveVipere>();
+          Debug.Log("prey touched " + controlCollisionPrey.touched);
+          if (controlCollisionPrey.touched == false)
           {
-            controlscript.touched = true; // access this particular touched variable
+            Debug.Log("prey.touched previously touched ? : " + touched) ;
+            controlCollisionPrey.touched = true; // access this particular touched variable
             collision.gameObject.transform.position = homeVipere ;
           }
+          else
+          {
+            Debug.Log("WTF ??") ;
+          }
         }
-        else if (collision.gameObject.tag=="Wall")
+        else if (collision.gameObject.tag == tagFriend)
             {
+              MovePoule controlCollisiontFriend = collision.gameObject.GetComponent<MovePoule>();
+              controlCollisiontFriend.touched = false;
               //agent.SetDestination(new Vector3(0,0,0));
               // Destroy(collision.gameObject);
-            Debug.Log("Mur touché : ");
+            Debug.Log("Ami touché : ");
 
             }
     }

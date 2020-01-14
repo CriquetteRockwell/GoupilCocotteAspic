@@ -321,14 +321,14 @@ public class MoveRenard : MonoBehaviour
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
           MovePoule controlscript = collision.gameObject.GetComponent<MovePoule>();
-          if (controlscript.touched = false)
+          if (controlscript.touched == false)
           {
             Debug.Log("Mur touché : ");
             controlscript.touched = true; // access this particular touched variable
             collision.gameObject.transform.position = homePoule ;
           }
         }
-      else if (collision.gameObject.tag=="Wall")
+      else if (collision.gameObject.tag =="Wall")
           {
             //agent.SetDestination(new Vector3(0,0,0));
             // Destroy(collision.gameObject);
