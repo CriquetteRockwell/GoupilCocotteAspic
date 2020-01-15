@@ -41,7 +41,6 @@ public class MoveVipere : MonoBehaviour
   private GameObject prey ;
 
   private GameObject[] friendList ;
-  private GameObject[] newFriendList ;
   private GameObject[] friendListMinusMe ;
   private GameObject[] temporaire ;
   private GameObject friend ;
@@ -86,6 +85,14 @@ public class MoveVipere : MonoBehaviour
         return false;
     }
 
+bool freeFriendsFromJail(out Vector3 point)
+
+{
+  point = transform.position ;
+  return true ;
+
+}
+
     void RunAway(Vector3 point)
     {
         if (AwayPoint(point, range, out Vector3 goal))
@@ -101,23 +108,19 @@ public class MoveVipere : MonoBehaviour
 
           if (hitForward)
           {
-            //Debug.Log("Wall straight ahead ");
             if (hitRight)
             {
               if (hitLeft && (hitRayLeft.distance < hitRayRight.distance ))
               {
-              //  Debug.Log("Wall to the right as well ");
                 destination = goal + agent.transform.position + agent.transform.right * offsetFromWall * 2.0f;
               }
               else
               {
-                //Debug.Log("Wall to the right as well ");
                 destination = goal + agent.transform.position - agent.transform.right * offsetFromWall * 2.0f;
               }
             }
             else if (hitLeft)
             {
-              //  Debug.Log("Wall to the left as well ");
                 destination = goal + agent.transform.position + agent.transform.right * offsetFromWall;
             }
 
@@ -213,6 +216,7 @@ public class MoveVipere : MonoBehaviour
 
     bool AmiArreteEnVue(out Vector3 result)
     {
+
       if(friendList.Length > 1){  // test seulement dans le cas ou la poule est seule (test unitaire)
 
         List<GameObject> friendArreteList = new List<GameObject>();
@@ -221,8 +225,6 @@ public class MoveVipere : MonoBehaviour
         for (int i = 0; i < friendListMinusMe.Length; i++)
         {
               GameObject friend = friendListMinusMe[i];
-              Debug.Log(i) ;
-              Debug.Log(friendListMinusMe[i]) ;
               MoveVipere controlAlterArrete = friend.GetComponent<MoveVipere>();
               friendTouched = controlAlterArrete.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
@@ -336,7 +338,7 @@ public class MoveVipere : MonoBehaviour
           }
           else
           {
-            Debug.Log(gameObject.name + " : Get out of my way !!") ;
+            print(gameObject.name + " : Get out of my way !!") ;
           }
         }
         else if (collision.gameObject.tag == tagFriend)
@@ -349,7 +351,7 @@ public class MoveVipere : MonoBehaviour
               }
               else
               {
-                Debug.Log("Pardon copain");
+                print("Pardon copain");
               }
 
 
@@ -368,12 +370,10 @@ public class MoveVipere : MonoBehaviour
       {
         if (jeNeSuisPasSeul)
         {
-          Debug.Log("jeNeSuisPasSeul : " + jeNeSuisPasSeul);
           RunAfter(friendPosition);
         }
         else // n'est lu que pour le premier arreté. on l'immobilise alors, pour ne pas que la grappe sorte de la prison
         {
-          Debug.Log("je devrai etre arreté " + jeNeSuisPasSeul);
           agent.isStopped = true;
         }
       }

@@ -62,7 +62,7 @@ public class MovePoule : MonoBehaviour
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       friendList = GameObject.FindGameObjectsWithTag(tagFriend);
       temporaire = new GameObject[friendList.Length - 1];
-      getRidOfMyselfInFriendArray(friendList, out GameObject[] friendListMinusMe);
+      getRidOfMyselfInFriendArray(friendList, out friendListMinusMe);
       enChasse = false;
       prisEnChasse = false;
       touched = false;
@@ -156,9 +156,7 @@ public class MovePoule : MonoBehaviour
     {
       int j = 0 ;
 
-      if(anyList.Length != 0)
-      {  // test seulement dans le cas ou la poule est seule (test unitaire)
-          for (int i = 0; i < anyList.Length; i++)
+      for (int i = 0; i < anyList.Length; i++)
           {
                 GameObject item = anyList[i];
 
@@ -170,11 +168,6 @@ public class MovePoule : MonoBehaviour
           }
           gotRidList = temporaire ;
       }
-      else
-      {
-        gotRidList = friendList ;
-      }
-    }
 
     bool CibleEnVue(out Vector3 result)
     {
@@ -233,7 +226,8 @@ public class MovePoule : MonoBehaviour
       {
         result = new Vector3 (0.0f,0.0f,0.0f) ;
         jeNeSuisPasSeul = false ;
-        return jeNeSuisPasSeul ;}
+        return jeNeSuisPasSeul ;
+      }
     }
 
     Transform getClosest(List<GameObject> preyVisibleList)
@@ -260,8 +254,6 @@ public class MovePoule : MonoBehaviour
         return result; }
     }
 
-
-
     bool prisPourCible(out Vector3 result)
     {
       for (int i = 0; i < predatorList.Length; i++)
@@ -284,9 +276,6 @@ public class MovePoule : MonoBehaviour
         result = Vector3.zero;
         return false;
     }
-
-
-
 
     void FreeWalk()
     {
@@ -329,7 +318,7 @@ public class MovePoule : MonoBehaviour
           }
           else
           {
-            Debug.Log(gameObject.name + " : Get out of my way !!") ;
+            print(gameObject.name + " : Get out of my way !!") ;
           }
         }
         else if (collision.gameObject.tag == tagFriend)
@@ -342,7 +331,7 @@ public class MovePoule : MonoBehaviour
               }
               else
               {
-                Debug.Log("Pardon copain");
+                print("Pardon copain");
               }
 
 
