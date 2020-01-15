@@ -6,40 +6,44 @@ using UnityEngine;
 
 public class MoveRenard : MonoBehaviour
 {
-    private UnityEngine.AI.NavMeshAgent agent;
-    private UnityEngine.AI.NavMeshHit hit;
-    public float range = 5.0f;
-    public float sightRange = 15.0f;
-    public float sightAngle = 170.0f;
-    public float pondAppetit = 0.5f ;
-    public float pondPeur = 0.5f;
-    public float pondAltruist = 1.0f ;
+  private UnityEngine.AI.NavMeshAgent agent ;
+  private UnityEngine.AI.NavMeshHit hit ;
+  public float range = 5.0f ;
+  public float sightRange = 15.0f ;
+  public float sightAngle = 170.0f;
+  public float pondAppetit = 0.5f ;
+  public float pondPeur = 0.5f ;
+  public float pondAltruist = 1.0f ;
 
-    private Vector3 direction;
-    private Vector3 distance ;
-    private Vector3 destination ;
-    private Vector3 directionRay ;
-    private float offsetFromWall = 4.0f ;
-    private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
-
-    private bool prisEnChasse ;
-    private bool enChasse ;
-    [HideInInspector] // Hides var below
-    public bool touched ;
-    private bool preyTouched ;
-    private bool predatorTouched ;
-    private bool friendTouched ;
-    private bool jeNeSuisPasSeul ;
+  //public Vector3 point;
+  private Vector3 direction;
+  private Vector3 distance ;
+  private Vector3 destination ;
+  private Vector3 directionRay ;
+  private float offsetFromWall = 4.0f ;
+  private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
 
 
-    private GameObject[] predatorList ;
-    private GameObject predator ;
+  private bool prisEnChasse ;
+  private bool enChasse ;
+  //[HideInInspector] // Hides var below
+  public bool touched ;
+  private bool preyTouched ;
+  private bool predatorTouched ;
+  private bool friendTouched ;
+  private bool jeNeSuisPasSeul ;
 
-    private GameObject[] preyList ;
-    private GameObject prey ;
 
-    private GameObject[] friendList ;
-    private GameObject friend ;
+  private GameObject[] predatorList ;
+  private GameObject predator ;
+
+  private GameObject[] preyList ;
+  private GameObject prey ;
+
+  private GameObject[] friendList ;
+  private GameObject[] newFriendList ;
+  private GameObject[] temporaire ;
+  private GameObject friend ;
 
     private string tagPrey = "Poule1";
     private string tagPredator = "Vipere1";
@@ -47,20 +51,22 @@ public class MoveRenard : MonoBehaviour
 
 
     private Vector3 homePoule = new Vector3( 15.0f,  0.0f, 0.0f);
-    private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
+    private Vector3 homeRenard = new Vector3(- 23.0f,  0.0f, 0.0f);
 
 
 
 
     void Start()
     {
-        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
-        predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
-        preyList = GameObject.FindGameObjectsWithTag(tagPrey);
-        enChasse = false;
-        prisEnChasse = false;
-        touched = false ;
-        // Vector3 point = predator.transform.position;
+      agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+      predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
+      preyList = GameObject.FindGameObjectsWithTag(tagPrey);
+      friendList = GameObject.FindGameObjectsWithTag(tagFriend);
+      temporaire = new GameObject[friendList.Length - 1];
+      getRidOfMyselfInFriendArray(friendList, out GameObject[] nemFriendList);
+      enChasse = false;
+      prisEnChasse = false;
+      touched = false;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -77,6 +83,20 @@ public class MoveRenard : MonoBehaviour
         }
         result = Vector3.zero;
         return false;
+    }
+
+    void getRidOfMyselfInFriendArray (GameObject[] anyList, out GameObject[] gotRidList)
+    {
+          int i = 0 ;
+          foreach(GameObject item in anyList)
+          {
+            if ((item.name.Split('(')[1] ) != (gameObject.name.Split('(')[1] ) )
+            {
+              temporaire[i]=friend;
+              i = i + 1 ;
+            }
+          }
+          gotRidList = temporaire ;
     }
 
     bool AmiArreteEnVue(out Vector3 result)

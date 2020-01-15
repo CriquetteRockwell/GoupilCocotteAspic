@@ -42,16 +42,16 @@ public class MoveVipere : MonoBehaviour
 
   private GameObject[] friendList ;
   private GameObject[] newFriendList ;
+  private GameObject[] friendListMinusMe ;
   private GameObject[] temporaire ;
   private GameObject friend ;
 
   private string tagPrey = "Renard1";
   private string tagPredator = "Poule1";
   private string tagFriend = "Vipere1";
-  private string myName ;
 
-  private Vector3 homeRenard = new Vector3(- 15.0f,  15.0f, 0.0f);
-  private Vector3 homeVipere = new Vector3( 0.0f,  15.0f, 0.0f);
+  private Vector3 homeRenard = new Vector3(- 23.0f,  0.0f, 0.0f);
+  private Vector3 homeVipere = new Vector3( 23.0f,  0.0f, 23.0f);
 
 
 
@@ -64,13 +64,10 @@ public class MoveVipere : MonoBehaviour
         preyList = GameObject.FindGameObjectsWithTag(tagPrey);
         friendList = GameObject.FindGameObjectsWithTag(tagFriend);
         temporaire = new GameObject[friendList.Length - 1];
-        getRidOfMyselfInFriendArray(friendList, out GameObject[] nemFriendList);
+        getRidOfMyselfInFriendArray(friendList, out friendListMinusMe);
         enChasse = false;
         prisEnChasse = false;
         touched = false;
-        myName = this.name ;
-
-        // Vector3 point = predator.transform.position;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -145,22 +142,6 @@ public class MoveVipere : MonoBehaviour
           agent.SetDestination(point);
     }
 
-    void getRidOfMyselfInFriendArray (GameObject[] anyList, out GameObject[] gotRidList)
-    {
-          int i = 0 ;
-          foreach(GameObject item in anyList)
-          {
-            Debug.Log(item.name.Split('(')[1] );
-            Debug.Log(myName.Split('(')[1] );
-            if ((item.name.Split('(')[1] ) != (myName.Split('(')[1]) )
-            {
-              temporaire[i]=friend;
-              i = i + 1 ;
-            }
-          }
-          gotRidList = temporaire ;
-    }
-
     bool AwayPoint(Vector3 predatorPosition, float range, out Vector3 result)
     {
         // Gets a vector that points from the player's position to the target's.
@@ -177,29 +158,47 @@ public class MoveVipere : MonoBehaviour
         return false;
     }
 
+    void getRidOfMyselfInFriendArray (GameObject[] anyList, out GameObject[] gotRidList)
+    {
+      int j = 0;
+
+      if(anyList.Length != 0)
+      {  // test seulement dans le cas ou la poule est seule (test unitaire)
+          for (int i = 0; i < anyList.Length; i++)
+          {
+                GameObject item = anyList[i];
+            if ((item.name.Split('(')[1] ) != (gameObject.name.Split('(')[1] ) )
+            {
+              temporaire[j] = item;
+              j = j + 1 ;
+            }
+          }
+          gotRidList = temporaire ;
+      }
+      else
+      {
+        gotRidList = friendList ;
+      }
+    }
+
     bool CibleEnVue(out Vector3 result)
     {
       if(preyList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
-        var distancePrey = ( transform.position - preyList[0].transform.position ).magnitude;
-        //result = preyList[0].transform.position;
-        //System.Array.clear(preyVisibleList,0,preyVisibleList.length);
-        List<GameObject> preyVisibleList = new List<GameObject>();
 
-          for (int i = 0; i < preyList.Length; i++)
-          {
+        List<GameObject> preyVisibleList = new List<GameObject>();
+        result = Vector3.zero;
+        enChasse = false ;
+        for (int i = 0; i < preyList.Length; i++)
+        {
               GameObject prey = preyList[i];
-              MoveRenard controlscript = prey.GetComponent<MoveRenard>();
-              preyTouched = controlscript.touched; // access this particular touched variable
+              MoveRenard controlPreyTouched = prey.GetComponent<MoveRenard>();
+              preyTouched = controlPreyTouched.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
               if ( ((prey.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(prey.transform.position - agent.transform.position, agent.transform.forward) < sightAngle) && (preyTouched == false) )
                 {
                   enChasse = true ;
                   preyVisibleList.Add(prey) ;
 
-                } else  {
-
-                  result = Vector3.zero;
-                  enChasse = false ;
                 }
           }
           Transform tempResult = getClosest(preyVisibleList);
@@ -214,25 +213,23 @@ public class MoveVipere : MonoBehaviour
 
     bool AmiArreteEnVue(out Vector3 result)
     {
-      if((friendList.Length -1 )!= 0) {  // test seulement dans le cas ou la poule est seule (test unitaire)
-        //result = preyList[0].transform.position;
-        //System.Array.clear(preyVisibleList,0,preyVisibleList.length);
-        List<GameObject> friendArreteList = new List<GameObject>();
+      if(friendList.Length > 1){  // test seulement dans le cas ou la poule est seule (test unitaire)
 
-          for (int i = 0; i < friendList.Length; i++)
-          {
-              GameObject friend = friendList[i];
-              MoveVipere controlscript = friend.GetComponent<MoveVipere>();
-              friendTouched = controlscript.touched; // access this particular touched variable
+        List<GameObject> friendArreteList = new List<GameObject>();
+        jeNeSuisPasSeul = false ;
+        result = Vector3.zero;
+        for (int i = 0; i < friendListMinusMe.Length; i++)
+        {
+              GameObject friend = friendListMinusMe[i];
+              Debug.Log(i) ;
+              Debug.Log(friendListMinusMe[i]) ;
+              MoveVipere controlAlterArrete = friend.GetComponent<MoveVipere>();
+              friendTouched = controlAlterArrete.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-              if ( friendTouched == false )
+              if ( friendTouched == true )
                 {
                   friendArreteList.Add(friend) ;
                   jeNeSuisPasSeul = true ;
-                }
-                else
-                {
-                  jeNeSuisPasSeul = false ;
                 }
           }
           Transform tempResult = getClosest(friendArreteList);
@@ -240,7 +237,8 @@ public class MoveVipere : MonoBehaviour
           return jeNeSuisPasSeul ;
       }
       else
-      { result = new Vector3 (0.0f,0.0f,0.0f) ;
+      {
+        result = new Vector3 (0.0f,0.0f,0.0f) ;
         jeNeSuisPasSeul = false ;
         return jeNeSuisPasSeul ;}
     }
@@ -253,7 +251,7 @@ public class MoveVipere : MonoBehaviour
         var distance = ecart.magnitude;
         var result = preyVisibleList[0].transform;
         foreach (GameObject preyVisible in preyVisibleList)
-        {
+          {
             if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
             {
               ecart = transform.position - preyVisible.transform.position ;
@@ -275,9 +273,9 @@ public class MoveVipere : MonoBehaviour
     {
         for (int i = 0; i < predatorList.Length; i++)
         {
-            GameObject predator = predatorList[i];
-            MovePoule controlscript = predator.GetComponent<MovePoule>();
-            predatorTouched = controlscript.touched; // access this particular touched variable
+                GameObject predator = predatorList[i];
+            MovePoule controlPredatorTouched = predator.GetComponent<MovePoule>();
+            predatorTouched = controlPredatorTouched.touched; // access this particular touched variable
             if ( ((predator.transform.position - agent.transform.position).magnitude < sightRange) && (predatorTouched == false) )
             {
                 Vector3 cibleDir = predator.transform.position - agent.transform.position;
@@ -319,10 +317,6 @@ public class MoveVipere : MonoBehaviour
                   Debug.DrawRay(point, Vector3.up, Color.blue, 1.0f);
                   agent.SetDestination(point);
                 }
-                else
-                {
-                  //print("ray touched") ;
-                }
             }
           }
         }
@@ -334,19 +328,30 @@ public class MoveVipere : MonoBehaviour
         {
           //agent.SetDestination(new Vector3(0,0,0));
           // Destroy(collision.gameObject);
-          MoveRenard controlscript = collision.gameObject.GetComponent<MoveRenard>();
-          if (controlscript.touched == false)
+          MoveRenard controlPreyVulnerable = collision.gameObject.GetComponent<MoveRenard>();
+          if (controlPreyVulnerable.touched == false)
           {
-            controlscript.touched = true; // access this particular touched variable
+            controlPreyVulnerable.touched = true; // access this particular touched variable
             collision.gameObject.transform.position = homeRenard ;
           }
-
+          else
+          {
+            Debug.Log(gameObject.name + " : Get out of my way !!") ;
+          }
         }
-        else if (collision.gameObject.tag =="Wall")
+        else if (collision.gameObject.tag == tagFriend)
             {
-              //agent.SetDestination(new Vector3(0,0,0));
-              // Destroy(collision.gameObject);
-            //Debug.Log("Mur touché : ");
+
+              MoveVipere controlCollisiontFriend = collision.gameObject.GetComponent<MoveVipere>();
+              if ( controlCollisiontFriend.touched == true && touched == false)
+              {
+                controlCollisiontFriend.touched = false ;
+              }
+              else
+              {
+                Debug.Log("Pardon copain");
+              }
+
 
             }
     }
@@ -354,23 +359,21 @@ public class MoveVipere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-      predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
-      preyList = GameObject.FindGameObjectsWithTag(tagPrey);
-      friendList = GameObject.FindGameObjectsWithTag(tagFriend);
-      jeNeSuisPasSeul = AmiArreteEnVue(out Vector3 friendPosition);
+      temporaire = new GameObject[friendList.Length - 1];
+      jeNeSuisPasSeul = AmiArreteEnVue(out Vector3 friendPosition) ;
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
-      Debug.Log("iueshfiuf" + myName);
 
       if (touched == true)
       {
-        Debug.Log("jeNeSuisPasSeul : " + jeNeSuisPasSeul);
         if (jeNeSuisPasSeul)
         {
+          Debug.Log("jeNeSuisPasSeul : " + jeNeSuisPasSeul);
           RunAfter(friendPosition);
         }
         else // n'est lu que pour le premier arreté. on l'immobilise alors, pour ne pas que la grappe sorte de la prison
         {
+          Debug.Log("je devrai etre arreté " + jeNeSuisPasSeul);
           agent.isStopped = true;
         }
       }
@@ -384,17 +387,5 @@ public class MoveVipere : MonoBehaviour
       else if (enChasse == true && prisEnChasse == false) {   RunAfter( preyPosition) ; } // mode chasse
       else if (enChasse == false && prisEnChasse == true) {   RunAway( predatorPosition) ; } // mode fuite
       }
-
-      // if( enChasse && prisEnChasse ) {
-      //   if  (Vector3.Distance(preyPosition,transform.position)*pondAppetit > Vector3.Distance(predatorPosition,transform.position)*pondPeur) // mode intermédiaire
-      //        {  RunAfter(preyPosition) ; }
-      //   else {  RunAfter(preyPosition) ; } }
-      // else if (enChasse == false && prisEnChasse == false) {    RunAfter(preyPosition) ; } // mode balade
-      // else if (enChasse == true && prisEnChasse == false) {   RunAfter( preyPosition) ; } // mode chasse
-      // else if (enChasse == false && prisEnChasse == true) {   RunAfter(preyPosition) ; } // mode fuite
-
-
-
-
     }
 }
