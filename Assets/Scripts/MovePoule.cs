@@ -24,7 +24,8 @@ public class MovePoule : MonoBehaviour
   private float offsetFromWall = 4.0f ;
   private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
 
-
+  [HideInInspector]
+  public static GameObject premierePouleArrested ;
   private bool prisEnChasse ;
   private bool enChasse ;
   //[HideInInspector] // Hides var below
@@ -335,6 +336,7 @@ public class MovePoule : MonoBehaviour
               if ( controlCollisiontFriend.touched == true && touched == false)
               {
                 controlCollisiontFriend.touched = false ;
+                agent.Resume();
               }
               else
               {
@@ -357,11 +359,13 @@ public class MovePoule : MonoBehaviour
       {
         if (jeNeSuisPasSeul)
         {
-          RunAfter(friendPosition);
+          RunAfter(MovePoule.premierePouleArrested.transform.position);
         }
         else // n'est lu que pour le premier arreté. on l'immobilise alors, pour ne pas que la grappe sorte de la prison
         {
           agent.isStopped = true;
+          premierePouleArrested = gameObject;
+          agent.transform.position = homePoule ;
         }
       }
       else

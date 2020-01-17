@@ -23,7 +23,8 @@ public class MoveRenard : MonoBehaviour
   private float offsetFromWall = 4.0f ;
   private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
 
-
+  [HideInInspector] 
+  public static GameObject premierRenardArrested ;
   private bool prisEnChasse ;
   private bool enChasse ;
   //[HideInInspector] // Hides var below
@@ -171,7 +172,7 @@ public class MoveRenard : MonoBehaviour
 
     bool CibleEnVue(out Vector3 result)
     {
-      if(preyList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
+      if(preyList.Length != 0){  // test seulement dans le cas ou le renard est seule (test unitaire)
 
         List<GameObject> preyVisibleList = new List<GameObject>();
         result = Vector3.zero;
@@ -201,18 +202,16 @@ public class MoveRenard : MonoBehaviour
 
     bool AmiArreteEnVue(out Vector3 result)
     {
-      if(friendList.Length != 0){  // test seulement dans le cas ou la poule est seule (test unitaire)
-
         List<GameObject> friendArreteList = new List<GameObject>();
         jeNeSuisPasSeul = false ;
 
-          for (int i = 0; i < friendList.Length; i++)
+          for (int i = 0; i < friendListMinusMe.Length; i++)
           {
-              GameObject friend = friendList[i];
-              MoveRenard controlscript = friend.GetComponent<MoveRenard>();
-              friendTouched = controlscript.touched; // access this particular touched variable
+              GameObject friend = friendListMinusMe[i];
+              MoveRenard controlTouchedFriend = friend.GetComponent<MoveRenard>();
+              friendTouched = controlTouchedFriend.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
-              if ( friendTouched == false )
+              if ( friendTouched == true )
                 {
                   friendArreteList.Add(friend) ;
                   jeNeSuisPasSeul = true ;
@@ -221,13 +220,6 @@ public class MoveRenard : MonoBehaviour
           Transform tempResult = getClosest(friendArreteList);
           result = tempResult.position ;
           return jeNeSuisPasSeul ;
-      }
-      else
-      {
-        result = new Vector3 (0.0f,0.0f,0.0f) ;
-        jeNeSuisPasSeul = false ;
-        return jeNeSuisPasSeul ;
-      }
     }
 
     Transform getClosest(List<GameObject> preyVisibleList)
@@ -320,13 +312,14 @@ public class MoveRenard : MonoBehaviour
             // print(gameObject.name + " : Get out of my way !!") ;
           }
         }
-      else if (collision.gameObject.tag =="Wall")
+      else if (collision.gameObject.tag == tagFriend)
           {
 
             MoveRenard controlCollisiontFriend = collision.gameObject.GetComponent<MoveRenard>();
             if ( controlCollisiontFriend.touched == true && touched == false)
             {
               controlCollisiontFriend.touched = false ;
+              agent.Resume();
             }
             else
             {
@@ -347,13 +340,16 @@ public class MoveRenard : MonoBehaviour
 
       if (touched == true)
       {
+        Debug.Log(jeNeSuisPasSeul);
         if (jeNeSuisPasSeul)
         {
-          RunAfter(friendPosition);
+          RunAfter(MoveRenard.premierRenardArrested.transform.position);
         }
         else // n'est lu que pour le premier arreté. on l'immobilise alors, pour ne pas que la grappe sorte de la prison
         {
           agent.isStopped = true;
+          premierRenardArrested = gameObject;
+          agent.transform.position = homeRenard ;
         }
       }
       else

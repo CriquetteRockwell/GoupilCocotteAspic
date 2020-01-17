@@ -23,7 +23,8 @@ public class MoveVipere : MonoBehaviour
   private float offsetFromWall = 4.0f ;
   private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
 
-
+  [HideInInspector]
+  public static GameObject premiereVipereArrested ;
   private bool prisEnChasse ;
   private bool enChasse ;
   //[HideInInspector] // Hides var below
@@ -347,6 +348,7 @@ bool freeFriendsFromJail(out Vector3 point)
               if ( controlCollisiontFriend.touched == true && touched == false)
               {
                 controlCollisiontFriend.touched = false ;
+                agent.Resume();
               }
               else
               {
@@ -369,11 +371,13 @@ bool freeFriendsFromJail(out Vector3 point)
       {
         if (jeNeSuisPasSeul)
         {
-          RunAfter(friendPosition);
+          RunAfter(MoveVipere.premiereVipereArrested.transform.position);
         }
         else // n'est lu que pour le premier arreté. on l'immobilise alors, pour ne pas que la grappe sorte de la prison
         {
           agent.isStopped = true;
+          premiereVipereArrested = gameObject;
+          agent.transform.position = homeVipere ;
         }
       }
       else
