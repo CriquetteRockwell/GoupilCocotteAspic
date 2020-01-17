@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
  void Start()
   {
-      GetComponent<Button>().onClick.AddListener(TogglePause);
      }
 
  public void TogglePause() {

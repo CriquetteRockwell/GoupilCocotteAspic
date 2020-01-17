@@ -267,7 +267,6 @@ public class MoveRenard : MonoBehaviour
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
                 {
                     result = predator.transform.position;
-                    // print("Oh god une vipère");
                     prisEnChasse = true;
                     return true;
                 }
@@ -318,7 +317,7 @@ public class MoveRenard : MonoBehaviour
           }
           else
           {
-            print(gameObject.name + " : Get out of my way !!") ;
+            // print(gameObject.name + " : Get out of my way !!") ;
           }
         }
       else if (collision.gameObject.tag =="Wall")
@@ -331,7 +330,7 @@ public class MoveRenard : MonoBehaviour
             }
             else
             {
-              print("Pardon copain");
+              // print("Pardon copain");
             }
 
           }

@@ -284,7 +284,6 @@ bool freeFriendsFromJail(out Vector3 point)
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
                 {
                     result = predator.transform.position;
-                    //print("Oh god une vipère");
                     prisEnChasse = true;
                     return true;
                 }
@@ -338,7 +337,7 @@ bool freeFriendsFromJail(out Vector3 point)
           }
           else
           {
-            print(gameObject.name + " : Get out of my way !!") ;
+            // print(gameObject.name + " : Get out of my way !!") ;
           }
         }
         else if (collision.gameObject.tag == tagFriend)
@@ -351,7 +350,7 @@ bool freeFriendsFromJail(out Vector3 point)
               }
               else
               {
-                print("Pardon copain");
+                // print("Pardon copain");
               }
 
 

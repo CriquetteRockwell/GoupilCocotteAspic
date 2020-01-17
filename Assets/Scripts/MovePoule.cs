@@ -11,9 +11,10 @@ public class MovePoule : MonoBehaviour
   public float range = 5.0f ;
   public float sightRange = 15.0f ;
   public float sightAngle = 170.0f;
-  public float pondAppetit = 0.5f ;
-  public float pondPeur = 0.5f ;
+  public float pondAppetit = 1.0f ;
+  public float pondPeur = 1f ;
   public float pondAltruist = 1.0f ;
+  public float pondEgoist = 1.0f ;
 
   //public Vector3 point;
   private Vector3 direction;
@@ -57,15 +58,22 @@ public class MovePoule : MonoBehaviour
 
     void Start()
     {
+      // initialisation des listes d'agents
       agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       friendList = GameObject.FindGameObjectsWithTag(tagFriend);
       temporaire = new GameObject[friendList.Length - 1];
       getRidOfMyselfInFriendArray(friendList, out friendListMinusMe);
+
+      // initialisation des variables
       enChasse = false;
       prisEnChasse = false;
       touched = false;
+      pondPeur = 1.0f ;
+      pondAppetit = SliderManager.sliderAgressivite.value * pondPeur ;
+      pondEgoist = 1.0f ;
+      pondAltruist = SliderManager.sliderSolidaire.value * pondPeur ;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -267,7 +275,6 @@ public class MovePoule : MonoBehaviour
                 if (Vector3.Angle(cibleDir, agent.transform.forward) < sightAngle)
                 {
                     result = predator.transform.position;
-                    //print("Oh god une vipère");
                     prisEnChasse = true;
                     return true;
                 }
@@ -318,7 +325,7 @@ public class MovePoule : MonoBehaviour
           }
           else
           {
-            print(gameObject.name + " : Get out of my way !!") ;
+            // print(gameObject.name + " : Get out of my way !!") ;
           }
         }
         else if (collision.gameObject.tag == tagFriend)
@@ -331,7 +338,7 @@ public class MovePoule : MonoBehaviour
               }
               else
               {
-                print("Pardon copain");
+                // print("Pardon copain");
               }
 
 
