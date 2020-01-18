@@ -32,7 +32,8 @@ public class MovePoule : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
-  private bool gameOver ;
+    [HideInInspector]
+  static public bool gameOverPoule ;
 
 
   private GameObject[] predatorList ;
@@ -73,7 +74,7 @@ public class MovePoule : MonoBehaviour
     touched = false;
     firstVictim = false ;
     amiArrete = false ;
-    gameOver = false ;
+    gameOverPoule = false ;
   }
 
   bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -407,14 +408,14 @@ public class MovePoule : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    gameOver = endOfGame();
+    gameOverPoule = endOfGame();
     temporaire = new GameObject[friendList.Length - 1];
     amiArrete = getPlusProcheAmiArrete(out Vector3 friendPosition) ;
     enChasse = CibleEnVue(out Vector3 preyPosition);
     prisEnChasse = prisPourCible(out Vector3 predatorPosition);
     unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
 
-    if(gameOver)
+    if(gameOverPoule)
     {
       //Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
       //TextPouleVictorious.GetComponent.<Text> ().enabled = true;

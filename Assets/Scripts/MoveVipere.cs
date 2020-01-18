@@ -31,7 +31,8 @@ public class MoveVipere : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
-  private bool gameOver ;
+    [HideInInspector]
+  static public bool gameOverVipere ;
 
 
   private GameObject[] predatorList ;
@@ -73,7 +74,7 @@ public class MoveVipere : MonoBehaviour
         touched = false;
         firstVictim = false ;
         amiArrete = false ;
-        gameOver = false ;
+        gameOverVipere = false ;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -429,7 +430,7 @@ public class MoveVipere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-      gameOver = endOfGame();
+      gameOverVipere = endOfGame();
       temporaire = new GameObject[friendList.Length - 1];
       amiArrete = getPlusProcheAmiArrete(out Vector3 friendPosition) ;
       enChasse = CibleEnVue(out Vector3 preyPosition);
@@ -438,7 +439,7 @@ public class MoveVipere : MonoBehaviour
       pondAppetit = SliderManager.sliderAgressivite.value * pondPeur;
       pondAltruist = SliderManager.sliderSolidaire.value * pondEgoist;
 
-      if(gameOver)
+      if(gameOverVipere)
       {
         //Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
         //TextPouleVictorious.GetComponent.<Text> ().enabled = true;

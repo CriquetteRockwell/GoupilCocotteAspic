@@ -31,7 +31,8 @@ public class MoveRenard : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
-  private bool gameOver ;
+    [HideInInspector]
+  static public bool gameOverRenard ;
 
 
   private GameObject[] predatorList ;
@@ -71,7 +72,7 @@ public class MoveRenard : MonoBehaviour
       touched = false;
       firstVictim = false ;
       amiArrete = false ;
-      gameOver = false ;
+      gameOverRenard = false ;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -406,14 +407,14 @@ public class MoveRenard : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-      gameOver = endOfGame();
+      gameOverRenard = endOfGame();
       temporaire = new GameObject[friendList.Length - 1];
       amiArrete = getPlusProcheAmiArrete(out Vector3 friendPosition) ; // necessaire pour les comportement des personnes arretés
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
       unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
 
-      if(gameOver)
+      if(gameOverRenard)
       {
         //Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
         //TextPouleVictorious.GetComponent.<Text> ().enabled = true;

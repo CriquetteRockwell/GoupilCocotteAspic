@@ -22,5 +22,20 @@ public void Accelerate()
     {
       Time.timeScale = Time.timeScale / 5.0f ;
     }
+    public void afficherGagnant()
+    {
+      if(MovePoule.gameOverPoule)
+      {
+
+      }
+      else if (MoveRenard.gameOverRenard)
+      {
+
+      }
+      else if (MoveVipere.gameOverVipere)
+      {
+
+      }
+    }
 
  }
