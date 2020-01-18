@@ -17,9 +17,6 @@ public class MovePoule : MonoBehaviour
   public float pondEgoist = 1.0f ;
 
   //public Vector3 point;
-  private Vector3 direction;
-  private Vector3 distance ;
-  private Vector3 destination ;
   private Vector3 directionRay ;
   private float offsetFromWall = 4.0f ;
   private Vector3 offset = new Vector3 (-10.0f, 0.0f, -10.0f) ;
@@ -35,6 +32,7 @@ public class MovePoule : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
+  private bool gameOver ;
 
 
   private GameObject[] predatorList ;
@@ -52,9 +50,11 @@ public class MovePoule : MonoBehaviour
   private string tagPredator = "Renard1";
   private string tagFriend = "Poule1";
 
+  private GameObject TextPouleVictorious ;
 
-  private Vector3 homeVipere = new Vector3( 23.0f,  0.0f, 23.0f);
-  private Vector3 homePoule = new Vector3( 23.0f,  0.0f, -23.0f);
+
+  private Vector3 homeVipere = new Vector3( 23.0f,  0.0f, 0.0f);
+  private Vector3 homePoule = new Vector3( -23.0f,  0.0f, 23.0f);
 
 
 
@@ -64,6 +64,8 @@ public class MovePoule : MonoBehaviour
     predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
     preyList = GameObject.FindGameObjectsWithTag(tagPrey);
     friendList = GameObject.FindGameObjectsWithTag(tagFriend);
+    TextPouleVictorious = GameObject.Find("POULE VICTORIOUS") ;
+    //TextPouleVictorious.GetComponent.<Text> ().enabled = false;
     temporaire = new GameObject[friendList.Length - 1];
     getRidOfMyselfInFriendArray(friendList, out friendListMinusMe);
     enChasse = false;
@@ -71,6 +73,7 @@ public class MovePoule : MonoBehaviour
     touched = false;
     firstVictim = false ;
     amiArrete = false ;
+    gameOver = false ;
   }
 
   bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -106,7 +109,7 @@ public class MovePoule : MonoBehaviour
             if ( ((camarade.transform.position - agent.transform.position).magnitude < sightRange) && (Vector3.Angle(camarade.transform.position - agent.transform.position, agent.transform.forward) < sightAngle) && ( friendArrested == true ) )
               {
                 unCamaradeALiberer = true ;
-                friendArrestedVisibleList.Add(prey) ;
+                friendArrestedVisibleList.Add(camarade) ;
                }
         }
         Transform tempResult = getClosest(friendArrestedVisibleList);
@@ -126,7 +129,7 @@ public class MovePoule : MonoBehaviour
       if (AwayPoint(point, range, out Vector3 goal))
       {
          LayerMask mask = LayerMask.GetMask("Wall");
-         destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
+         Vector3 destination = agent.transform.position + goal ; //le vecteur goal est appliqué depuis la position de l'agent
         // This would cast rays only against colliders in layer 8.
         // But instead we want to collide against everything except layer 8. The ~ operator does this, it inverts a bitmask.
         float distanceRay = Vector3.Distance(transform.position,destination);
@@ -176,8 +179,8 @@ public class MovePoule : MonoBehaviour
     bool AwayPoint(Vector3 predatorPosition, float range, out Vector3 result)
     {
         // Gets a vector that points from the player's position to the target's.
-        distance = predatorPosition - transform.position;
-        direction = distance.normalized;
+        Vector3 distance = predatorPosition - transform.position;
+        Vector3 direction = distance.normalized;
         Vector3 cible = - direction * range;
         UnityEngine.AI.NavMeshHit hit;
         if (UnityEngine.AI.NavMesh.SamplePosition(cible, out hit, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
@@ -215,6 +218,34 @@ public class MovePoule : MonoBehaviour
           }
         }
         gotRidList = temporaire ;
+    }
+
+    bool endOfGame()
+    {
+      for (int j = 0; j < preyList.Length; j++)
+        {
+          prey = preyList[j] ;
+          MoveVipere controlTouchedPrey = prey.GetComponent<MoveVipere>();
+          preyTouched = controlTouchedPrey.touched;
+          if(preyTouched)
+          {
+          for (int k = 0; k < predatorList.Length; k++)
+            {
+              predator = predatorList[k] ;
+              MoveRenard controlTouchedPredator = predator.GetComponent<MoveRenard>();
+              predatorTouched = controlTouchedPredator.touched;
+              if(predatorTouched == false)
+              {
+                return false ;
+              }
+            }
+          }
+          else
+          {
+            return false;
+          }
+        }
+        return true;
     }
 
   bool CibleEnVue(out Vector3 result)
@@ -269,19 +300,17 @@ public class MovePoule : MonoBehaviour
         return amiArrete ;
   }
 
-  Transform getClosest(List<GameObject> preyVisibleList)
+  Transform getClosest(List<GameObject> GameObjectVisibleList)
   {
-    if(preyVisibleList.Count != 0){
+    if(GameObjectVisibleList.Count != 0){
     // initialisation
-      var ecart = transform.position - preyVisibleList[0].transform.position;
-      var distance = ecart.magnitude;
-      var result = preyVisibleList[0].transform;
-      foreach (GameObject preyVisible in preyVisibleList)
+      float distance = Vector3.Distance(transform.position, GameObjectVisibleList[0].transform.position);
+      Transform result = GameObjectVisibleList[0].transform;
+      foreach (GameObject preyVisible in GameObjectVisibleList)
       {
           if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
           {
-            ecart = transform.position - preyVisible.transform.position ;
-            distance = ecart.magnitude ; // on donne la nouvelle valeur à comparer
+            distance = Vector3.Distance(transform.position, preyVisible.transform.position) ;
             result = preyVisible.transform ; // on définie la proie la plus proche
           }
         }
@@ -378,16 +407,18 @@ public class MovePoule : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    gameOver = endOfGame();
     temporaire = new GameObject[friendList.Length - 1];
     amiArrete = getPlusProcheAmiArrete(out Vector3 friendPosition) ;
     enChasse = CibleEnVue(out Vector3 preyPosition);
     prisEnChasse = prisPourCible(out Vector3 predatorPosition);
     unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-    Debug.Log("enChasse : " + enChasse);
-    Debug.Log("prisEnChasse : " + prisEnChasse);
-    Debug.Log("amiArrete . " + amiArrete);
-    Debug.Log("touched : " + touched);
-    Debug.Log("unCamaradeALiberer : " + unCamaradeALiberer);
+
+    if(gameOver)
+    {
+      //Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
+      //TextPouleVictorious.GetComponent.<Text> ().enabled = true;
+    }
 
     if (touched == true)
     {
@@ -416,13 +447,13 @@ public class MovePoule : MonoBehaviour
         {
           if  (Vector3.Distance(preyPosition,transform.position)*pondAppetit > Vector3.Distance(predatorPosition,transform.position)*pondPeur)  // mode intermédiaire
           {
-            if  (unCamaradeALiberer && Vector3.Distance(preyPosition,transform.position)*pondEgoist > Vector3.Distance(friendToBeSavedPosition,transform.position)*pondAltruist) // mode intermédiaire
+            if  (Vector3.Distance(preyPosition,transform.position)*pondEgoist > Vector3.Distance(friendToBeSavedPosition,transform.position)*pondAltruist) // mode intermédiaire
                  { RunAfter(preyPosition); } // mode chasse
             else { RunAfter(friendToBeSavedPosition) ; } // mode solidaire
           }
           else
           {
-            if  (unCamaradeALiberer && Vector3.Distance(predatorPosition,transform.position)*pondEgoist > Vector3.Distance(friendToBeSavedPosition,transform.position)*pondAltruist) // mode intermédiaire
+            if  (Vector3.Distance(predatorPosition,transform.position)*pondEgoist > Vector3.Distance(friendToBeSavedPosition,transform.position)*pondAltruist) // mode intermédiaire
                { RunAway( predatorPosition) ; } // mode fuite
           else { RunAfter(friendToBeSavedPosition) ; } // mode solidaire
           }
@@ -448,7 +479,7 @@ public class MovePoule : MonoBehaviour
                { RunAfter(preyPosition); } // mode chasse
           else { RunAfter(friendToBeSavedPosition) ; } // mode solidaire
         }
-        else  {  RunAway( predatorPosition) ; }
+        else  {  RunAfter( preyPosition) ; }
       }
       else if (enChasse == false && prisEnChasse == true)
       {

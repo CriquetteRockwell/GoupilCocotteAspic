@@ -234,14 +234,14 @@ public class MovePouleSave : MonoBehaviour
           return jeNeSuisPasSeul ;
     }
 
-    Transform getClosest(List<GameObject> preyVisibleList)
+    Transform getClosest(List<GameObject> GameObjectVisibleList)
     {
-      if(preyVisibleList.Count != 0){
+      if(GameObjectVisibleList.Count != 0){
       // initialisation
-        var ecart = transform.position - preyVisibleList[0].transform.position;
+        var ecart = transform.position - GameObjectVisibleList[0].transform.position;
         var distance = ecart.magnitude;
-        var result = preyVisibleList[0].transform;
-        foreach (GameObject preyVisible in preyVisibleList)
+        var result = GameObjectVisibleList[0].transform;
+        foreach (GameObject preyVisible in GameObjectVisibleList)
           {
             if (Vector3.Distance(transform.position, preyVisible.transform.position) < distance)
             {
@@ -352,6 +352,7 @@ Debug.Log("enchassse = " + enChasse);
 Debug.Log("prisEnChasse = " + prisEnChasse);
 Debug.Log("jeNeSuisPasSeul = " + jeNeSuisPasSeul);
 Debug.Log("touched = " + touched);
+Debug.Log("prisEnChasse : " + prisEnChasse);
 
 
 

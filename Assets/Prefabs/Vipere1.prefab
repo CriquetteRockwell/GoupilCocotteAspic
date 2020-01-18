@@ -243,4 +243,5 @@ MonoBehaviour:
   pondAppetit: 1
   pondPeur: 1
   pondAltruist: 1
+  pondEgoist: 1
   touched: 0
