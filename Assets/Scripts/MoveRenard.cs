@@ -31,6 +31,7 @@ public class MoveRenard : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
+  private bool gameOver ;
     [HideInInspector]
   static public bool gameOverRenard ;
 
@@ -72,6 +73,8 @@ public class MoveRenard : MonoBehaviour
       firstVictim = false ;
       amiArrete = false ;
       gameOverRenard = false ;
+      agent.isStopped = false ;
+      gameOver = false ;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -404,13 +407,19 @@ public class MoveRenard : MonoBehaviour
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
       unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-      pondAppetit = SliderManagerAnger.sliderAgressivite.value * pondPeur ;
-      pondAltruist = SliderManagerSolidarity.sliderSolidaire.value * pondEgoist ;
+      pondAppetit = SliderManagerAnger.sliderAgressiviteRenard.value * pondPeur ;
+      pondAltruist = SliderManagerSolidarity.sliderSolidaireRenard.value * pondEgoist ;
 
       if(gameOverRenard)
       {
         SliderManagerSolidarity.gameOverRenardPanel.SetActive(true) ;
         Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
+        gameOver = true ;
+      }
+
+      if(gameOver)
+      {
+        agent.isStopped = true ;
       }
 
       if (touched == true)

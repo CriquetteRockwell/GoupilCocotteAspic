@@ -32,6 +32,7 @@ public class MovePoule : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
+  private bool gameOver ;
     [HideInInspector]
   static public bool gameOverPoule ;
 
@@ -73,6 +74,8 @@ public class MovePoule : MonoBehaviour
     firstVictim = false ;
     amiArrete = false ;
     gameOverPoule = false ;
+    agent.isStopped = false ;
+    gameOver = false ;
   }
 
   bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -406,13 +409,19 @@ public class MovePoule : MonoBehaviour
     enChasse = CibleEnVue(out Vector3 preyPosition);
     prisEnChasse = prisPourCible(out Vector3 predatorPosition);
     unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-    pondAppetit = SliderManagerAnger.sliderAgressivite.value * pondPeur ;
-    pondAltruist = SliderManagerSolidarity.sliderSolidaire.value * pondEgoist ;
+    pondAppetit = SliderManagerAnger.sliderAgressivitePoule.value * pondPeur ;
+    pondAltruist = SliderManagerSolidarity.sliderSolidairePoule.value * pondEgoist ;
 
     if(gameOverPoule)
     {
       SliderManagerSolidarity.gameOverPoulePanel.SetActive(true) ;
       Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
+      gameOver = true ;
+    }
+
+    if(gameOver)
+    {
+      agent.isStopped = true ;
     }
 
     if (touched == true)

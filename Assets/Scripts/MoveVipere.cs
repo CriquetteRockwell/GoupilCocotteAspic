@@ -31,6 +31,7 @@ public class MoveVipere : MonoBehaviour
   private bool amiArrete ;
   private bool firstVictim ;
   private bool unCamaradeALiberer ;
+  private bool gameOver ;
     [HideInInspector]
   static public bool gameOverVipere ;
 
@@ -73,6 +74,8 @@ public class MoveVipere : MonoBehaviour
         firstVictim = false ;
         amiArrete = false ;
         gameOverVipere = false ;
+        agent.isStopped = false ;
+        gameOver = false ;
     }
 
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
@@ -422,13 +425,19 @@ public class MoveVipere : MonoBehaviour
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
       unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-      pondAppetit = SliderManagerAnger.sliderAgressivite.value * pondPeur ;
-      pondAltruist = SliderManagerSolidarity.sliderSolidaire.value * pondEgoist ;
+      pondAppetit = SliderManagerAnger.sliderAgressiviteVipere.value * pondPeur ;
+      pondAltruist = SliderManagerSolidarity.sliderSolidaireVipere.value * pondEgoist ;
 
       if(gameOverVipere)
       {
         SliderManagerSolidarity.gameOverViperePanel.SetActive(true) ;
         Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
+        gameOver = true ;
+      }
+
+      if(gameOver)
+      {
+        agent.isStopped = true ;
       }
 
       if (touched == true)
