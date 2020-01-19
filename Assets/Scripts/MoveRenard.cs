@@ -7,6 +7,7 @@ public class MoveRenard : MonoBehaviour
 {
   private UnityEngine.AI.NavMeshAgent agent ;
   private UnityEngine.AI.NavMeshHit hit ;
+  private float tailleTerrain = 23.0f ;
   public float range = 5.0f ;
   public float sightRange = 10.0f ;
   public float sightAngle = 170.0f;
@@ -62,6 +63,11 @@ public class MoveRenard : MonoBehaviour
 
     void Start()
     {
+      float x = Random.Range(-23, 23);
+      float  y = 0;
+      float z = Random.Range(-23, 23);
+      Vector3 depart  = new Vector3(x, y, z);
+      transform.position = depart;
       agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
@@ -217,33 +223,20 @@ public class MoveRenard : MonoBehaviour
           }
      }
 
-      bool endOfGame()
-      {
-        for (int j = 0; j < preyList.Length; j++)
-          {
-            prey = preyList[j] ;
-            MovePoule controlTouchedPrey = prey.GetComponent<MovePoule>();
-            preyTouched = controlTouchedPrey.touched;
-            if(preyTouched)
-            {
-            for (int k = 0; k < predatorList.Length; k++)
-              {
-                predator = predatorList[k] ;
-                MoveVipere controlTouchedPredator = predator.GetComponent<MoveVipere>();
-                predatorTouched = controlTouchedPredator.touched;
-                if(predatorTouched == false)
-                {
-                  return false ;
-                }
-              }
-            }
-            else
-            {
-              return false;
-            }
-          }
-          return true;
-      }
+     bool endOfGame()
+     {
+       for (int j = 0; j < preyList.Length; j++)
+         {
+           prey = preyList[j] ;
+           MovePoule controlTouchedPrey = prey.GetComponent<MovePoule>();
+           preyTouched = controlTouchedPrey.touched;
+           if(preyTouched == false)
+           {
+             return false;
+           }
+         }
+         return true;
+     }
 
     bool CibleEnVue(out Vector3 result)
     {
@@ -407,8 +400,13 @@ public class MoveRenard : MonoBehaviour
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
       unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-      pondAppetit = SliderManagerAnger.sliderAgressiviteRenard.value * pondPeur ;
-      pondAltruist = SliderManagerSolidarity.sliderSolidaireRenard.value * pondEgoist ;
+
+      float sliderValueAgr = SliderManagerAnger.sliderAgressiviteRenard.value ;
+      float sliderValueAlt = SliderManagerSolidarity.sliderSolidaireRenard.value ;
+      float facteurAlt = Mathf.Pow(10, sliderValueAlt) ;
+      float facteurAgr = Mathf.Pow(10, sliderValueAgr) ;
+      pondAppetit = facteurAgr  * pondPeur ;
+      pondAltruist = facteurAlt  * pondEgoist ;
 
       if(gameOverRenard)
       {

@@ -8,6 +8,7 @@ public class MovePoule : MonoBehaviour
 {
   private UnityEngine.AI.NavMeshAgent agent ;
   private UnityEngine.AI.NavMeshHit hit ;
+  private float tailleTerrain = 23.0f ;
   public float range = 5.0f ;
   public float sightRange = 10.0f ;
   public float sightAngle = 170.0f;
@@ -60,8 +61,14 @@ public class MovePoule : MonoBehaviour
   private Vector3 homePoule = new Vector3( -21.0f,  0.0f, 21.0f);
 
 
+
   void Start()
   {
+    float x = Random.Range(-23, 23);
+    float  y = 0;
+    float z = Random.Range(-23, 23);
+    Vector3 depart  = new Vector3(x, y, z);
+    transform.position = depart;
     friendList = GameObject.FindGameObjectsWithTag(tagFriend);
     agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
     predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
@@ -225,20 +232,7 @@ public class MovePoule : MonoBehaviour
           prey = preyList[j] ;
           MoveVipere controlTouchedPrey = prey.GetComponent<MoveVipere>();
           preyTouched = controlTouchedPrey.touched;
-          if(preyTouched)
-          {
-          for (int k = 0; k < predatorList.Length; k++)
-            {
-              predator = predatorList[k] ;
-              MoveRenard controlTouchedPredator = predator.GetComponent<MoveRenard>();
-              predatorTouched = controlTouchedPredator.touched;
-              if(predatorTouched == false)
-              {
-                return false ;
-              }
-            }
-          }
-          else
+          if(preyTouched == false)
           {
             return false;
           }
@@ -409,8 +403,13 @@ public class MovePoule : MonoBehaviour
     enChasse = CibleEnVue(out Vector3 preyPosition);
     prisEnChasse = prisPourCible(out Vector3 predatorPosition);
     unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-    pondAppetit = SliderManagerAnger.sliderAgressivitePoule.value * pondPeur ;
-    pondAltruist = SliderManagerSolidarity.sliderSolidairePoule.value * pondEgoist ;
+    float sliderValueAgr = SliderManagerAnger.sliderAgressiviteRenard.value ;
+    float sliderValueAlt = SliderManagerSolidarity.sliderSolidaireRenard.value ;
+    float facteurAlt = Mathf.Pow(10, sliderValueAlt) ;
+    float facteurAgr = Mathf.Pow(10, sliderValueAgr) ;
+    pondAppetit = facteurAgr  * pondPeur ;
+    pondAltruist = facteurAlt  * pondEgoist ;
+
 
     if(gameOverPoule)
     {

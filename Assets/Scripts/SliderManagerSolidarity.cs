@@ -33,9 +33,17 @@ public class SliderManagerSolidarity : MonoBehaviour
 
 public void SliderSolidaire()
 {
-  Debug.Log("solidarité / egoisme Poule = " + sliderSolidairePoule.value);
-  Debug.Log("solidarité / egoisme Vipere = " + sliderSolidaireVipere.value);
-  Debug.Log("solidarité / egoisme Renard = " + sliderSolidaireRenard.value);
+  float slidValPoul = sliderSolidairePoule.value ;
+  float valuePoule = Mathf.Pow(10, slidValPoul) ;
+  Debug.Log("solidarité / egoisme Poule = " + valuePoule);
+
+  float slidValVip = sliderSolidaireVipere.value ;
+  float valueVipere = Mathf.Pow(10, slidValVip) ;
+  Debug.Log("solidarité / egoisme Vipere = " + slidValVip);
+
+  float slidValRen = sliderSolidaireVipere.value ;
+  float valueRenard = Mathf.Pow(10, slidValRen) ;
+  Debug.Log("solidarité / egoisme Renard = " + slidValRen);
 
 }
 

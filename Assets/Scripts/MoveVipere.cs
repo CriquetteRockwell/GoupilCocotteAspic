@@ -7,6 +7,7 @@ public class MoveVipere : MonoBehaviour
 {
   private UnityEngine.AI.NavMeshAgent agent ;
   private UnityEngine.AI.NavMeshHit hit ;
+  private float tailleTerrain = 23.0f ;
   public float range = 10.0f ;
   public float sightRange = 15.0f ;
   public float sightAngle = 170.0f;
@@ -59,9 +60,15 @@ public class MoveVipere : MonoBehaviour
   private Vector3 homeVipere = new Vector3( 21.0f,  0.0f, 0.0f);
 
 
+
     // Start is called before the first frame update
     void Start()
     {
+        float x = Random.Range(-23, 23);
+        float  y = 0;
+        float z = Random.Range(-23, 23);
+        Vector3 depart  = new Vector3(x, y, z);
+        transform.position = depart;
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
         preyList = GameObject.FindGameObjectsWithTag(tagPrey);
@@ -218,33 +225,20 @@ public class MoveVipere : MonoBehaviour
           }
      }
 
-    bool endOfGame()
-    {
-      for (int j = 0; j < preyList.Length; j++)
-        {
-          prey = preyList[j] ;
-          MoveRenard controlTouchedPrey = prey.GetComponent<MoveRenard>();
-          preyTouched = controlTouchedPrey.touched;
-          if(preyTouched)
-          {
-          for (int k = 0; k < predatorList.Length; k++)
-            {
-              predator = predatorList[k] ;
-              MovePoule controlTouchedPredator = predator.GetComponent<MovePoule>();
-              predatorTouched = controlTouchedPredator.touched;
-              if(predatorTouched == false)
-              {
-                return false ;
-              }
-            }
-          }
-          else
-          {
-            return false;
-          }
-        }
-        return true;
-    }
+     bool endOfGame()
+     {
+       for (int j = 0; j < preyList.Length; j++)
+         {
+           prey = preyList[j] ;
+           MoveRenard controlTouchedPrey = prey.GetComponent<MoveRenard>();
+           preyTouched = controlTouchedPrey.touched;
+           if(preyTouched == false)
+           {
+             return false;
+           }
+         }
+         return true;
+     }
 
     bool CibleEnVue(out Vector3 result)
     {
@@ -425,8 +419,12 @@ public class MoveVipere : MonoBehaviour
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
       unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-      pondAppetit = SliderManagerAnger.sliderAgressiviteVipere.value * pondPeur ;
-      pondAltruist = SliderManagerSolidarity.sliderSolidaireVipere.value * pondEgoist ;
+      float sliderValueAgr = SliderManagerAnger.sliderAgressiviteRenard.value ;
+      float sliderValueAlt = SliderManagerSolidarity.sliderSolidaireRenard.value ;
+      float facteurAlt = Mathf.Pow(10, sliderValueAlt) ;
+      float facteurAgr = Mathf.Pow(10, sliderValueAgr) ;
+      pondAppetit = facteurAgr  * pondPeur ;
+      pondAltruist = facteurAlt  * pondEgoist ;
 
       if(gameOverVipere)
       {

@@ -216,9 +216,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18ccbf4ad7689fa4397956a0d5eb2abf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 10
-  sightRange: 90
-  sightAngle: 360
+  range: 20
+  sightRange: 30
+  sightAngle: 170
   pondAppetit: 1
   pondPeur: 1
   pondAltruist: 1

@@ -20,8 +20,16 @@ public class SliderManagerAnger : MonoBehaviour
 
 public void SliderPeur()
 {
+  float slidValPoul = sliderAgressivitePoule.value ;
+  float valuePoule = Mathf.Pow(10, slidValPoul) ;
   Debug.Log("Agressivite / peur Poule = " + sliderAgressivitePoule.value);
+
+  float slidValVip = sliderAgressiviteRenard.value ;
+  float valueVipere = Mathf.Pow(10, slidValVip) ;
   Debug.Log("Agressivite / peur Renard = " + sliderAgressiviteRenard.value);
+
+  float slidValRen = sliderAgressiviteVipere.value ;
+  float valueRenard = Mathf.Pow(10, slidValRen) ;
   Debug.Log("Agressivite / peur Vipere = " + sliderAgressiviteVipere.value);
 }
 
