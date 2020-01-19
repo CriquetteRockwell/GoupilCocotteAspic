@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class MoveRenard : MonoBehaviour
+public class MoveRenardSaved : MonoBehaviour
 {
   private UnityEngine.AI.NavMeshAgent agent ;
   private UnityEngine.AI.NavMeshHit hit ;
@@ -42,12 +42,10 @@ public class MoveRenard : MonoBehaviour
   private GameObject prey ;
 
   private GameObject[] friendList ;
+  private GameObject[] friendListMinusMe ;
   private GameObject[] temporaire ;
   private GameObject friend ;
   private GameObject gameOverRenardPanel;
-
-  List<GameObject> friendListMinusMe = new List<GameObject>();
-  List<GameObject> gotRidList = new List<GameObject>();
 
 
     private string tagPrey = "Poule1";
@@ -59,12 +57,16 @@ public class MoveRenard : MonoBehaviour
     private Vector3 homeRenard = new Vector3(- 21.0f,  0.0f, -21.0f);
 
 
+
     void Start()
     {
       agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
       predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
       preyList = GameObject.FindGameObjectsWithTag(tagPrey);
       friendList = GameObject.FindGameObjectsWithTag(tagFriend);
+      temporaire = new GameObject[friendList.Length - 1];
+      gameOverRenardPanel = GameObject.FindWithTag("GameOverRenard") ;
+      gameOverRenardPanel.SetActive(false) ;
       getRidOfMyselfInFriendArray(friendList, out friendListMinusMe);
       enChasse = false;
       prisEnChasse = false;
@@ -92,14 +94,15 @@ public class MoveRenard : MonoBehaviour
 
     bool amiArreteEnVue(out Vector3 cible)
     {
-      if(friendListMinusMe.Count != 0)
+      if(friendListMinusMe.Length != 0)
       {  // test seulement dans le cas ou le renard est seule (test unitaire)
 
         List<GameObject> friendArrestedVisibleList = new List<GameObject>();
         cible = Vector3.zero;
         unCamaradeALiberer = false ;
-        foreach(GameObject camarade in friendListMinusMe)
-        {
+          for (int i = 0; i < friendListMinusMe.Length; i++)
+          {
+              GameObject camarade = friendListMinusMe[i];
               MoveRenard controlFriendArrested = camarade.GetComponent<MoveRenard>();
               bool friendArrested = controlFriendArrested.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
@@ -201,15 +204,18 @@ public class MoveRenard : MonoBehaviour
           return true;
       }
 
-    void getRidOfMyselfInFriendArray (GameObject[] anyList,out List<GameObject> gotRidList)
+    void getRidOfMyselfInFriendArray (GameObject[] anyList, out GameObject[] gotRidList)
     {
-      gotRidList = new List<GameObject>();
-      for (int i = 0; i < anyList.Length; i++)
-        {
-          GameObject item = anyList[i];
+      int j = 0 ;
+      gotRidList = new GameObject[anyList.Length -1];
+        for (int i = 0; i < anyList.Length; i++)
+          {
+                GameObject item = anyList[i];
+
             if (StringComparison(item.name, gameObject.name) == false  )
             {
-              gotRidList.Add(item);
+              gotRidList[j]=item;
+              j = j + 1 ;
             }
           }
      }
@@ -276,8 +282,10 @@ public class MoveRenard : MonoBehaviour
     {
         List<GameObject> friendArreteList = new List<GameObject>();
         amiArrete = false ;
-          foreach( GameObject friend in friendListMinusMe)
+
+          for (int i = 0; i < friendListMinusMe.Length; i++)
           {
+              GameObject friend = friendListMinusMe[i];
               MoveRenard controlTouchedFriend = friend.GetComponent<MoveRenard>();
               bool friendTouched = controlTouchedFriend.touched; // access this particular touched variable
               // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
@@ -404,12 +412,10 @@ public class MoveRenard : MonoBehaviour
       enChasse = CibleEnVue(out Vector3 preyPosition);
       prisEnChasse = prisPourCible(out Vector3 predatorPosition);
       unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
-      pondAppetit = SliderManagerAnger.sliderAgressivite.value * pondPeur ;
-      pondAltruist = SliderManagerSolidarity.sliderSolidaire.value * pondEgoist ;
 
       if(gameOverRenard)
       {
-        SliderManagerSolidarity.gameOverRenardPanel.SetActive(true) ;
+        gameOverRenardPanel.SetActive(true) ;
         Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
       }
 

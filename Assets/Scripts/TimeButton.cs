@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
  public class TimeButton : MonoBehaviour
 
  {
 
+
  void Start()
   {
+
      }
 
  public void TogglePause() {
@@ -22,20 +26,9 @@ public void Accelerate()
     {
       Time.timeScale = Time.timeScale / 5.0f ;
     }
-    public void afficherGagnant()
+  public void RestartGame()
     {
-      if(MovePoule.gameOverPoule)
-      {
+       SceneManager.LoadScene(SceneManager.GetActiveScene().name); // loads current scene
+     }
 
-      }
-      else if (MoveRenard.gameOverRenard)
-      {
-
-      }
-      else if (MoveVipere.gameOverVipere)
-      {
-
-      }
-    }
-
- }
+   }

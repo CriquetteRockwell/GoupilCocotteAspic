@@ -7,6 +7,9 @@ TagManager:
   - Renard1
   - Vipere1
   - Poule1
+  - GameOverPoule
+  - GameOverVipere
+  - GameOverRenard
   layers:
   - Default
   - TransparentFX

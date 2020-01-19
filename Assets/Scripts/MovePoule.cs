@@ -9,7 +9,7 @@ public class MovePoule : MonoBehaviour
   private UnityEngine.AI.NavMeshAgent agent ;
   private UnityEngine.AI.NavMeshHit hit ;
   public float range = 5.0f ;
-  public float sightRange = 15.0f ;
+  public float sightRange = 10.0f ;
   public float sightAngle = 170.0f;
   public float pondAppetit = 1.0f ;
   public float pondPeur = 1.0f ;
@@ -43,30 +43,28 @@ public class MovePoule : MonoBehaviour
   private GameObject prey ;
 
   private GameObject[] friendList ;
-  private GameObject[] friendListMinusMe ;
   private GameObject[] temporaire ;
   private GameObject friend ;
+  private GameObject gameOverPoulePanel;
+
+  List<GameObject> friendListMinusMe = new List<GameObject>();
+  List<GameObject> gotRidList = new List<GameObject>();
 
   private string tagPrey = "Vipere1";
   private string tagPredator = "Renard1";
   private string tagFriend = "Poule1";
 
-  private GameObject TextPouleVictorious ;
 
-
-  private Vector3 homeVipere = new Vector3( 23.0f,  0.0f, 0.0f);
-  private Vector3 homePoule = new Vector3( -23.0f,  0.0f, 23.0f);
-
+  private Vector3 homeVipere = new Vector3( 21.0f,  0.0f, 0.0f);
+  private Vector3 homePoule = new Vector3( -21.0f,  0.0f, 21.0f);
 
 
   void Start()
   {
+    friendList = GameObject.FindGameObjectsWithTag(tagFriend);
     agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
     predatorList = GameObject.FindGameObjectsWithTag(tagPredator);
     preyList = GameObject.FindGameObjectsWithTag(tagPrey);
-    friendList = GameObject.FindGameObjectsWithTag(tagFriend);
-    TextPouleVictorious = GameObject.Find("POULE VICTORIOUS") ;
-    //TextPouleVictorious.GetComponent.<Text> ().enabled = false;
     temporaire = new GameObject[friendList.Length - 1];
     getRidOfMyselfInFriendArray(friendList, out friendListMinusMe);
     enChasse = false;
@@ -95,15 +93,14 @@ public class MovePoule : MonoBehaviour
 
   bool amiArreteEnVue(out Vector3 cible)
   {
-    if(friendListMinusMe.Length != 0)
+    if(friendListMinusMe.Count != 0)
     {  // test seulement dans le cas ou le renard est seule (test unitaire)
 
       List<GameObject> friendArrestedVisibleList = new List<GameObject>();
       cible = Vector3.zero;
       unCamaradeALiberer = false ;
-        for (int i = 0; i < friendListMinusMe.Length; i++)
+      foreach(GameObject camarade in friendListMinusMe)
         {
-            GameObject camarade = friendListMinusMe[i];
             MovePoule controlFriendArrested = camarade.GetComponent<MovePoule>();
             bool friendArrested = controlFriendArrested.touched; // access this particular touched variable
             // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
@@ -205,21 +202,18 @@ public class MovePoule : MonoBehaviour
         return true;
     }
 
-  void getRidOfMyselfInFriendArray (GameObject[] anyList, out GameObject[] gotRidList)
-  {
-    int j = 0 ;
-
+    void getRidOfMyselfInFriendArray (GameObject[] anyList,out List<GameObject> gotRidList)
+    {
+      gotRidList = new List<GameObject>();
       for (int i = 0; i < anyList.Length; i++)
         {
-              GameObject item = anyList[i];
-          if (StringComparison(item.name, gameObject.name) == false )
-          {
-            temporaire[j]=item;
-            j = j + 1 ;
+          GameObject item = anyList[i];
+            if (StringComparison(item.name, gameObject.name) == false  )
+            {
+              gotRidList.Add(item);
+            }
           }
-        }
-        gotRidList = temporaire ;
-    }
+     }
 
     bool endOfGame()
     {
@@ -283,10 +277,8 @@ public class MovePoule : MonoBehaviour
   {
       List<GameObject> friendArreteList = new List<GameObject>();
       amiArrete = false ;
-
-        for (int i = 0; i < friendListMinusMe.Length; i++)
+        foreach(GameObject friend in friendListMinusMe)
         {
-            GameObject friend = friendListMinusMe[i];
             MovePoule controlTouchedFriend = friend.GetComponent<MovePoule>();
             bool friendTouched = controlTouchedFriend.touched; // access this particular touched variable
             // on teste si la prey est a distance de vue  ..................................  et    dans le champ de vision  ...........................................................................    et    s'il n'y a pas une proie plus proche
@@ -414,11 +406,13 @@ public class MovePoule : MonoBehaviour
     enChasse = CibleEnVue(out Vector3 preyPosition);
     prisEnChasse = prisPourCible(out Vector3 predatorPosition);
     unCamaradeALiberer = amiArreteEnVue(out Vector3 friendToBeSavedPosition); // necessaire pour sauver les amis.
+    pondAppetit = SliderManagerAnger.sliderAgressivite.value * pondPeur ;
+    pondAltruist = SliderManagerSolidarity.sliderSolidaire.value * pondEgoist ;
 
     if(gameOverPoule)
     {
-      //Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
-      //TextPouleVictorious.GetComponent.<Text> ().enabled = true;
+      SliderManagerSolidarity.gameOverPoulePanel.SetActive(true) ;
+      Time.timeScale = Mathf.Approximately(Time.timeScale, 0.0f) ? 1.0f : 0.0f;
     }
 
     if (touched == true)
