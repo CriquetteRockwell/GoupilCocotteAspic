@@ -57,7 +57,7 @@ public class MoveVipere : MonoBehaviour
 
 
   private Vector3 homeRenard = new Vector3(- 21.0f,  0.0f, -21.0f);
-  private Vector3 homeVipere = new Vector3( 21.0f,  0.0f, 0.0f);
+  private Vector3 homeVipere = new Vector3( 21.0f,  0.0f, 21.0f);
 
 
 

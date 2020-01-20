@@ -8,7 +8,7 @@ public class MoveRenard : MonoBehaviour
   private UnityEngine.AI.NavMeshAgent agent ;
   private UnityEngine.AI.NavMeshHit hit ;
   private float tailleTerrain = 23.0f ;
-  public float range = 5.0f ;
+  public float range = 10.0f ;
   public float sightRange = 10.0f ;
   public float sightAngle = 170.0f;
   public float pondAppetit = 1.0f ;
